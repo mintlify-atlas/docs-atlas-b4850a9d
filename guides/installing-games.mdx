@@ -1,0 +1,209 @@
+---
+title: "Download and Install Epic Games with Legendary"
+sidebarTitle: "Installing Games"
+description: "Install, update, repair, and manage Epic Games using Legendary. Covers DLC, delta patching, install paths, and selective downloading."
+---
+
+Legendary downloads and installs games from your Epic library directly to your file system, without the Epic Games Launcher. The core install command handles fresh installs, updates, and repairs all in one place — it automatically detects whether a game is already present and performs a delta update instead of a full re-download when possible.
+
+## Basic Installation
+
+To install a game, pass its App Name as shown in `legendary list`:
+
+```bash
+legendary install <App Name>
+```
+
+As of version 0.20.12, Legendary also accepts partial title matches and abbreviations, so you do not need to know the exact app name:
+
+```bash
+# Full title match
+legendary install "world of goo"
+
+# Abbreviation
+legendary install wog
+```
+
+<Tip>
+  Run `legendary list` first to see the app names and titles of all games on your account. The first run may take a moment to fetch your full game library.
+</Tip>
+
+## Common Install Options
+
+<Tabs>
+  <Tab title="Install Location">
+    By default Legendary installs games to `~/Games` (Linux/macOS) or a platform default on Windows. To specify a different base directory:
+
+    ```bash
+    legendary install <App Name> --base-path /mnt/games
+    ```
+
+    You can also set a specific folder name within the base path:
+
+    ```bash
+    legendary install <App Name> --base-path /mnt/games --game-folder MyGame
+    ```
+  </Tab>
+
+  <Tab title="DLC">
+    Legendary will ask whether to install DLC interactively. To skip the prompt:
+
+    ```bash
+    # Install the game with all available DLC
+    legendary install <App Name> --with-dlcs
+
+    # Skip DLC entirely (install base game only)
+    legendary install <App Name> --skip-dlcs
+    ```
+  </Tab>
+
+  <Tab title="Platform Override">
+    Some games have builds available for multiple platforms (for example, a macOS version alongside Windows). To install a specific platform build:
+
+    ```bash
+    legendary install <App Name> --platform Mac
+    ```
+
+    Common values are `Windows` and `Mac`. The default is `Windows` on all platforms.
+  </Tab>
+
+  <Tab title="Download Only">
+    To download game files without writing them to the final install location (useful for staging):
+
+    ```bash
+    legendary install <App Name> --download-only
+    ```
+  </Tab>
+</Tabs>
+
+## Updating Games
+
+The `install` command doubles as an update command — running it against an already-installed game performs a delta update:
+
+```bash
+legendary install <App Name>
+```
+
+You can also use the explicit alias:
+
+```bash
+legendary update <App Name>
+```
+
+**Skip if not installed:** To apply an update only when the game is already installed, and exit cleanly otherwise:
+
+```bash
+legendary install <App Name> --update-only
+```
+
+**Disable delta patching:** By default Legendary requests a delta manifest so only changed chunks are downloaded. To force a full manifest comparison:
+
+```bash
+legendary install <App Name> --disable-delta-manifests
+```
+
+## Repairing Installations
+
+To verify and re-download any missing or corrupted files:
+
+```bash
+legendary install <App Name> --repair
+```
+
+To repair and apply any pending update at the same time:
+
+```bash
+legendary install <App Name> --repair-and-update
+```
+
+## Performance Tuning
+
+<Tabs>
+  <Tab title="Memory & Workers">
+    Control how much shared memory the download manager uses and how many parallel worker processes run:
+
+    ```bash
+    # Set shared memory buffer in MiB (config default: 2048)
+    legendary install <App Name> --max-shared-memory 4096
+
+    # Set number of download workers (default: min(cpu_count * 2, 16))
+    legendary install <App Name> --max-workers 8
+    ```
+
+    Reduce peak RAM usage during large downloads by enabling chunk reordering:
+
+    ```bash
+    legendary install <App Name> --enable-reordering
+    ```
+  </Tab>
+
+  <Tab title="CDN & Network">
+    Pin downloads to a specific CDN hostname:
+
+    ```bash
+    legendary install <App Name> --preferred-cdn cdn.example.com
+    ```
+
+    Use plain HTTP instead of HTTPS (useful when routing through a LAN caching proxy):
+
+    ```bash
+    legendary install <App Name> --no-https
+    ```
+
+    Bind outgoing connections to specific IP addresses (comma-separated):
+
+    ```bash
+    legendary install <App Name> --bind 192.168.1.10,192.168.1.11
+    ```
+  </Tab>
+</Tabs>
+
+## Other Install Flags
+
+| Flag | Description |
+|---|---|
+| `--force` | Re-download all files even if they appear up to date |
+| `--ignore-free-space` | Skip the pre-flight free disk space check |
+| `--dl-timeout <sec>` | Per-chunk download timeout in seconds |
+
+## Managing Installed Games
+
+**List installed games:**
+
+```bash
+legendary list-installed
+```
+
+**Check for available updates while listing:**
+
+```bash
+legendary list-installed --check-updates
+```
+
+Output formats `--csv`, `--tsv`, and `--json` are also supported. To include installation directories in the output:
+
+```bash
+legendary list-installed --show-dirs
+```
+
+**Uninstall a game:**
+
+```bash
+legendary uninstall <App Name>
+```
+
+To remove the game from Legendary's database but keep files on disk:
+
+```bash
+legendary uninstall <App Name> --keep-files
+```
+
+**Move an installation to a new location:**
+
+```bash
+legendary move <App Name> /new/path
+```
+
+<Note>
+  `legendary move` relocates the game folder to a new base path and updates Legendary's install record. To update the record without physically moving files (if you have already moved them manually), add `--skip-move`.
+</Note>

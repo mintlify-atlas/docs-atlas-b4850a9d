@@ -1,0 +1,77 @@
+---
+title: "Legendary: Free and Open-Source Epic Games Launcher"
+sidebarTitle: "Introduction"
+description: "Legendary is a free CLI replacement for the Epic Games Launcher. Download, install, launch, and manage Epic Games on Linux, macOS, and Windows."
+---
+
+Legendary is a free, open-source command-line replacement for the Epic Games Launcher, built for players and power users who want full control over their Epic Games library without a heavyweight GUI application. It lets you authenticate with Epic's platform, download and install your games, manage DLC, sync cloud saves, and launch titles with online authentication — all from the terminal. The name is a tongue-in-cheek nod to the legendary tier of item rarity found in many MMORPGs. Licensed under the GPL-3.0, Legendary is community-driven and runs on Linux, Windows 8.1+, and macOS 12.0+.
+
+<Note>
+  Legendary is currently a CLI (command-line interface) application without a graphical user interface. It must be run from a terminal such as Bash, Zsh, or PowerShell. A simple GUI for managing and launching games is planned for a future release.
+</Note>
+
+## Supported Platforms
+
+| Platform | Minimum Version |
+|---|---|
+| Linux | Any modern distro (glibc ≥ 2.25 for prebuilt binary) |
+| Windows | 8.1+ (64-bit) |
+| macOS | 12.0+ (64-bit) |
+
+32-bit operating systems are not supported on any platform.
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/quickstart">
+    Log in to your Epic Games account via browser, webview (with pywebview), authorization code, or by importing credentials directly from the Epic Games Launcher.
+  </Card>
+  <Card title="Download & Install" icon="download" href="/guides/installing-games">
+    Download and install games and their DLC with delta patching, selective downloading, multi-worker support, and resume capability.
+  </Card>
+  <Card title="Cloud Saves" icon="cloud" href="/guides/cloud-saves">
+    Sync, upload, and download cloud saves fully compatible with the Epic Games Launcher's save format.
+  </Card>
+  <Card title="Wine & Linux Support" icon="wine-glass" href="/guides/installing-games">
+    Run Windows-only Epic titles on Linux and macOS using Wine or CrossOver, with per-game WINE prefix configuration.
+  </Card>
+  <Card title="EGL Sync" icon="rotate" href="/commands/overview">
+    Import and export installed games between Legendary and the Epic Games Launcher, with optional automatic bidirectional sync.
+  </Card>
+  <Card title="EOS Overlay" icon="layer-group" href="/commands/overview">
+    Install, update, enable, or disable the Epic Online Services overlay for compatible multiplayer titles.
+  </Card>
+  <Card title="Aliases" icon="tag" href="/configuration/config-file">
+    Define short, memorable aliases for game app names in your config file, or let Legendary auto-generate them from game titles.
+  </Card>
+  <Card title="Third-Party Activation" icon="gamepad" href="/commands/overview">
+    Activate Ubisoft Connect (Uplay) and EA/Origin titles that are linked to your Epic Games account.
+  </Card>
+</CardGroup>
+
+## Requirements
+
+Before installing Legendary, make sure your system meets the following requirements.
+
+**Runtime:**
+- **Python 3.10+ (64-bit)** — required for all installation methods except the prebuilt standalone binary
+- Windows users: Python must be **below 3.14** due to a `pythonnet` incompatibility
+
+**PyPI dependencies** (installed automatically via `pip`):
+- `requests` — HTTP client for Epic's APIs
+- `filelock` — safe concurrent file access
+- `pycryptodomex` — cryptography for manifest handling
+
+**Optional dependencies:**
+- `pywebview` (≥ 3.4) — enables an embedded browser window for a smoother login experience; not required if you prefer the manual authorization code flow
+- On Linux (Ubuntu), the `pywebview` GTK backend also requires `python3-gi-cairo`
+
+<Note>
+  Running Windows games on Linux or macOS requires [Wine](https://www.winehq.org/) or [CrossOver](https://www.codeweavers.com/) to be installed separately. Legendary handles the invocation — Wine itself must be present on your system.
+</Note>
+
+## License
+
+Legendary is licensed under the **GNU General Public License v3.0 or later (GPL-3.0-or-later)**. The full license text is included in the repository.
+
+Ready to get up and running? Head to the [Installation guide](/installation) to install Legendary on your platform.

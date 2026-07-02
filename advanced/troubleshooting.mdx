@@ -1,0 +1,272 @@
+---
+title: "Troubleshoot Legendary: Common Issues and Fixes"
+sidebarTitle: "Troubleshooting"
+description: "Diagnose and fix common Legendary issues including authentication failures, download errors, game launch problems, and cloud save conflicts."
+---
+
+Most Legendary problems can be quickly diagnosed by running the failing command with the `-v` (verbose/debug) flag, which prints detailed logs of every API call, file operation, and subprocess invocation. If the issue isn't immediately clear from the debug output, the sections below cover the most frequently encountered problems and their solutions.
+
+```bash
+legendary -v <command>
+```
+
+You can also set this permanently in `~/.config/legendary/config.ini` (Linux/macOS) or `%APPDATA%\legendary\config.ini` (Windows):
+
+```ini
+[Legendary]
+log_level = debug
+```
+
+<Accordion title="Authentication fails or credentials expire">
+Legendary stores OAuth tokens locally. If a token expires or becomes invalid (e.g. after a password change or a long period of inactivity), subsequent commands will fail with authentication errors.
+
+**Delete stored credentials and re-authenticate:**
+
+```bash
+legendary auth --delete
+legendary auth
+```
+
+**If the embedded webview doesn't open or fails to load:**
+
+```bash
+legendary auth --disable-webview
+```
+
+This falls back to a browser-based flow. Legendary will print a URL — open it manually, log in, and copy the `authorizationCode` value from the JSON response that appears after login. Paste it into the terminal when prompted.
+</Accordion>
+
+<Accordion title="Login page not opening in browser">
+If Legendary cannot open a browser window automatically, you can authenticate manually.
+
+1. Visit [https://legendary.gl/epiclogin](https://legendary.gl/epiclogin) in any browser.
+2. Log in with your Epic Games account.
+3. After login you will see a JSON object — copy the value of `authorizationCode`.
+4. Pass it directly to Legendary:
+
+```bash
+legendary auth --code <authorizationCode>
+```
+</Accordion>
+
+<Accordion title="Download is slow">
+Several settings affect download throughput. Try the following in order:
+
+**Increase the number of download workers** (default is usually 2):
+
+```bash
+legendary install <App> --max-workers 8
+```
+
+**Increase shared memory** (in MiB) used during installation:
+
+```bash
+legendary install <App> --max-shared-memory 2048
+```
+
+**Prefer a specific CDN host:**
+
+```bash
+legendary install <App> --preferred-cdn epicgames-download1.akamaized.net
+```
+
+You can make the CDN preference permanent in `config.ini`:
+
+```ini
+[Legendary]
+preferred_cdn = epicgames-download1.akamaized.net
+```
+
+**Set persistent worker and memory limits in config:**
+
+```ini
+[Legendary]
+max_workers = 8
+max_memory = 2048
+```
+</Accordion>
+
+<Accordion title="Game won't launch (Wine / Linux)">
+On Linux and macOS, Windows game binaries require Wine. If a game fails to launch, start by confirming Legendary is using the right Wine binary and prefix.
+
+**Specify the Wine binary explicitly:**
+
+```bash
+legendary launch <App> --wine /usr/bin/wine64
+```
+
+**Specify the Wine prefix explicitly:**
+
+```bash
+legendary launch <App> --wine-prefix ~/.wine
+```
+
+**Get a dry-run command to test the launch manually:**
+
+```bash
+legendary launch <App> --offline --dry-run
+```
+
+This prints the full launch command (including environment variables) without actually running it, so you can test it directly in a terminal or enter it into an external launcher like Lutris or Steam.
+
+**Set environment variables for debugging in `config.ini`:**
+
+```ini
+[AppName.env]
+WINEDEBUG = +relay
+WINEPREFIX = /path/to/prefix
+```
+</Accordion>
+
+<Accordion title="Game files are corrupt or game crashes on start">
+If a game crashes immediately or exhibits missing-asset behaviour, the local installation may be incomplete or corrupted.
+
+**Verify file integrity:**
+
+```bash
+legendary verify <App Name>
+```
+
+**Repair files that failed verification** (downloads only the bad files):
+
+```bash
+legendary install <App> --repair
+```
+
+**Repair and update to the latest version simultaneously:**
+
+```bash
+legendary install <App> --repair-and-update
+```
+
+<Note>
+`--repair-and-update` re-downloads any file that differs from the latest manifest, which means it will also apply any available updates. If you want to stay on the current version, use `--repair` alone.
+</Note>
+</Accordion>
+
+<Accordion title="Not enough disk space error">
+Legendary checks available disk space before starting a download and aborts if there isn't enough. If you know you have sufficient space (for example, the check is wrong due to a bind mount or quota setup), you can bypass it:
+
+```bash
+legendary install <App> --ignore-free-space
+```
+
+<Warning>
+Only use `--ignore-free-space` if you are certain you have enough space. Running out of disk mid-download will leave the installation in a broken state requiring repair.
+</Warning>
+</Accordion>
+
+<Accordion title="Cloud save conflicts">
+Legendary compares local and remote save timestamps before syncing. If a conflict is detected, it will ask you to resolve it manually unless you force a direction.
+
+**Force upload local saves to the cloud:**
+
+```bash
+legendary sync-saves --force-upload <App>
+```
+
+**Force download cloud saves to your local machine:**
+
+```bash
+legendary sync-saves --force-download <App>
+```
+
+**Override the save path if Legendary detected the wrong directory:**
+
+```bash
+legendary sync-saves --save-path /correct/path/to/saves <App>
+```
+
+After setting the correct path once with `--save-path`, Legendary saves it and uses it for future syncs.
+</Accordion>
+
+<Accordion title="EGL sync not working">
+Legendary can sync your game library bidirectionally with the Epic Games Launcher (EGL). If sync fails, the most common causes are an incorrect manifest path or, on Linux, an incorrect Wine prefix.
+
+**Specify the EGL Manifests folder path directly:**
+
+```bash
+legendary egl-sync --egl-manifest-path "/path/to/EGL/Data/Manifests"
+```
+
+**On Linux with a WINE installation of EGL, specify the WINE prefix:**
+
+```bash
+legendary egl-sync --egl-wine-prefix ~/Games/epic-games-store
+```
+
+**Reset sync and start fresh:**
+
+```bash
+legendary egl-sync --unlink
+legendary egl-sync
+```
+
+`--unlink` removes the saved sync configuration. The next `egl-sync` run will re-detect or re-prompt for the EGL path.
+</Accordion>
+
+<Accordion title="App name not recognized">
+Legendary uses a game's internal app name (e.g. `Anemone`) as the primary identifier. If a game name isn't found, try the following:
+
+**List all available games to find the exact app name:**
+
+```bash
+legendary list
+```
+
+**Use quotes for app names containing spaces:**
+
+```bash
+legendary install "world of goo"
+```
+
+As of version 0.20.12, Legendary also resolves partial name matches and abbreviations, so `legendary install wog` would also match World of Goo.
+
+**Create a short alias for a game:**
+
+```bash
+legendary alias add "World of Goo" wog
+```
+
+After adding an alias, `legendary install wog` works the same as using the full app name.
+</Accordion>
+
+<Accordion title="Temporary and metadata files taking up space">
+Over time, Legendary accumulates old manifests, delta files, and other temporary data in its cache directory.
+
+**Remove all old temporary and metadata files:**
+
+```bash
+legendary cleanup
+```
+
+**Remove temp files but keep old manifests** (useful if you want to roll back to a previous game version):
+
+```bash
+legendary cleanup --keep-manifests
+```
+</Accordion>
+
+<Accordion title="Update notifications are annoying">
+By default, Legendary checks for its own updates on startup and prints a notice if a newer version is available.
+
+**Disable the notice only** (check still runs, but nothing is printed):
+
+```ini
+[Legendary]
+disable_update_notice = true
+```
+
+**Disable the update check entirely:**
+
+```ini
+[Legendary]
+disable_update_check = true
+```
+</Accordion>
+
+---
+
+<Note>
+If none of the above resolves your issue, check the [GitHub issues page](https://github.com/legendary-gl/legendary/issues) for known bugs and community-reported workarounds, or ask for help on the [Legendary Discord](https://legendary.gl/discord). When reporting a bug, always include the output of the failing command run with `-v`.
+</Note>

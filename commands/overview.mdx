@@ -1,0 +1,132 @@
+---
+title: "Legendary CLI Command Reference Overview"
+sidebarTitle: "Overview"
+description: "Complete reference for all Legendary commands, global flags, and output formats. Legendary is a CLI Epic Games Launcher replacement."
+---
+
+Legendary is a free, open-source command-line replacement for the Epic Games Launcher that runs on Linux, macOS, and Windows. Every action — from authentication and game downloads to cloud save sync and EGL integration — is driven through a single `legendary` executable and a consistent set of subcommands. This page maps out the full command surface, documents the global flags that apply to every invocation, and explains the output-format options available across the toolset.
+
+## Invocation
+
+```bash
+legendary [-h] [-H] [-v] [-y] [-V] [-J] [-A <seconds>] <command> ...
+```
+
+<Note>
+  **PowerShell users:** When using the standalone `.exe` on Windows with
+  PowerShell, prefix the binary name with `.\` — for example,
+  `.\legendary auth` instead of `legendary auth`.
+</Note>
+
+## Global Flags
+
+These flags are accepted by every command and must be placed **before** the subcommand name.
+
+| Flag | Long form | Description |
+|------|-----------|-------------|
+| `-h` | `--help` | Show the help message and exit |
+| `-H` | `--full-help` | Show full help including all individual command help text |
+| `-v` | `--debug` | Set log level to debug (verbose output) |
+| `-y` | `--yes` | Default to **yes** for all interactive prompts |
+| `-V` | `--version` | Print the Legendary version string and exit |
+| `-J` | `--pretty-json` | Pretty-print any JSON output (indented, human-readable) |
+| `-A <seconds>` | `--api-timeout <seconds>` | HTTP request timeout for Epic API calls (default: `10` seconds) |
+
+### Debug mode
+
+Prefix any command with `-v` to enable verbose debug logging. This is invaluable when diagnosing download problems, authentication issues, or unexpected behaviour:
+
+```bash
+legendary -v install Anemone
+legendary -v launch "World of Goo"
+```
+
+## Output Formats
+
+Many Legendary commands support machine-readable output flags that can be combined with scripting or third-party tooling. Where supported, the following flags are mutually exclusive — only one should be used at a time:
+
+| Flag | Description |
+|------|-------------|
+| `--json` | Output data as a JSON object or array |
+| `--csv` | Output data as comma-separated values |
+| `--tsv` | Output data as tab-separated values |
+
+Commands that accept these flags include `list`, `list-installed`, `list-files`, `info`, `status`, and `launch` (for dry-run inspection). Combine with `-J` / `--pretty-json` at the global level to pretty-print JSON output.
+
+```bash
+# Machine-readable game list piped to jq
+legendary list --json | jq '.[].app_name'
+
+# CSV output of installed games
+legendary list-installed --csv
+```
+
+## Command Categories
+
+<CardGroup cols={2}>
+  <Card title="Authentication & Account" icon="user-lock" href="/commands/auth">
+    Manage your Epic Games Store login session and inspect current account
+    status. Covers browser-based login, authorization codes, session import
+    from EGL, and logout.
+
+    **Commands:** `auth`, `status`
+  </Card>
+  <Card title="Game Management" icon="gamepad" href="/commands/install">
+    Browse your library, install or update titles, launch games, verify
+    integrity, move installations, import existing folders, and inspect
+    detailed game metadata.
+
+    **Commands:** `list`, `install` / `download` / `update`, `launch`,
+    `uninstall`, `verify`, `move`, `import`, `info`, `list-installed`,
+    `list-files`
+  </Card>
+  <Card title="Cloud Saves" icon="cloud" href="/commands/sync-saves">
+    Synchronise save games with Epic's cloud storage. Download, upload, list,
+    and clean up cloud save slots for any supported title.
+
+    **Commands:** `sync-saves`, `list-saves`, `download-saves`, `clean-saves`
+  </Card>
+  <Card title="Integration & Utilities" icon="plug" href="/commands/egl-sync">
+    Bridge Legendary with the Epic Games Launcher, manage the EOS Overlay,
+    set up CrossOver on macOS, create app aliases, activate titles on
+    third-party launchers, and clean up cached metadata.
+
+    **Commands:** `egl-sync`, `eos-overlay`, `alias`, `activate`, `cleanup`,
+    `crossover`
+  </Card>
+</CardGroup>
+
+## Full Command List
+
+The table below is a quick-reference index of every Legendary subcommand.
+
+| Command | Aliases | Description |
+|---------|---------|-------------|
+| `activate` | — | Activate games on third-party launchers (Ubisoft Connect, EA/Origin) |
+| `alias` | — | Add, rename, remove, or list app name aliases |
+| `auth` | — | Authenticate with the Epic Games Store |
+| `clean-saves` | — | Remove incomplete or outdated cloud save files |
+| `cleanup` | — | Delete old temporary, metadata, and manifest files |
+| `crossover` | — | Configure CrossOver for launching Windows games (macOS only) |
+| `download-saves` | — | Download all available cloud saves locally |
+| `egl-sync` | — | Set up or run Epic Games Launcher ↔ Legendary sync |
+| `eos-overlay` | — | Install, update, remove, enable, disable, or inspect the EOS Overlay |
+| `import` | — | Import an already-installed game into the Legendary database |
+| `info` | — | Print detailed information about an app or manifest |
+| `install` | `download`, `update`, `repair` | Install, download, update, or repair a game |
+| `launch` | — | Launch a game with online or offline authentication |
+| `list` | — | List all games available on your account |
+| `list-files` | — | List all files described in a game's manifest |
+| `list-installed` | — | List locally installed games and optionally check for updates |
+| `list-saves` | — | List available cloud save slots for a game |
+| `move` | — | Move an installed game to a new base directory |
+| `status` | — | Show account status, game counts, and update availability |
+| `sync-saves` | — | Sync cloud saves for one or all supported games |
+| `uninstall` | — | Uninstall (delete) a game |
+| `verify` | — | Verify the integrity of an installed game's local files |
+
+<Tip>
+  Run `legendary -H` at any time to print the help text for every command in
+  one go, or `legendary <command> --help` to see the flags for a specific
+  subcommand.
+</Tip>

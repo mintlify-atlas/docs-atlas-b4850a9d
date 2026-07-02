@@ -1,0 +1,59 @@
+---
+title: "legendary clean-saves — Remove Incomplete Cloud Saves"
+sidebarTitle: "clean-saves"
+description: "legendary clean-saves removes orphaned or incomplete cloud save files from the Epic cloud. Use --delete-incomplete to clean up partial uploads."
+---
+
+`legendary clean-saves` scans the cloud saves stored on Epic's servers and removes entries that are incomplete or orphaned. Incomplete saves can accumulate after interrupted uploads, leaving partial manifests that waste space and can interfere with future sync operations. By default the command performs a dry-run style cleanup of clearly orphaned data; add `--delete-incomplete` to also remove saves that were only partially uploaded.
+
+## Usage
+
+```
+legendary clean-saves [-h] [--delete-incomplete] [<App Name>]
+```
+
+## Positional Arguments
+
+| Argument | Description |
+|---|---|
+| `<App Name>` | App name of the game whose saves should be cleaned (optional — if omitted, all games are checked) |
+
+## Options
+
+| Flag | Description |
+|---|---|
+| `--delete-incomplete` | Also delete save files that were only partially uploaded and are therefore incomplete |
+
+## Examples
+
+Clean orphaned saves for all games:
+
+```bash
+legendary clean-saves
+```
+
+Clean saves for a specific game only:
+
+```bash
+legendary clean-saves Anemone
+```
+
+Remove incomplete (partially-uploaded) saves as well:
+
+```bash
+legendary clean-saves --delete-incomplete
+```
+
+Target incomplete saves for a single game:
+
+```bash
+legendary clean-saves --delete-incomplete Anemone
+```
+
+<Warning>
+  `--delete-incomplete` permanently removes save data from Epic's cloud. Make sure you have a local backup of any saves you care about (for example via `legendary download-saves`) before using this flag, especially if interrupted uploads may have left files in an indeterminate state.
+</Warning>
+
+<Tip>
+  If you are regularly seeing incomplete saves accumulate, check whether your network connection is stable during uploads. Running `legendary sync-saves --force-upload <App Name>` after a clean can re-upload your current local saves to a fresh, complete state.
+</Tip>

@@ -1,0 +1,237 @@
+---
+title: "Install Legendary on Linux, macOS, and Windows"
+sidebarTitle: "Installation"
+description: "Install Legendary via pip, a prebuilt standalone binary, or your Linux distro's package manager. Supports Linux, macOS 12+, and Windows 8.1+."
+---
+
+Legendary can be installed in several ways depending on your platform and preferences. The PyPI package is the recommended method for all platforms because it always delivers the latest release and makes upgrades straightforward. Prebuilt standalone binaries are available for users who do not want to install Python, and Linux users can also use their distribution's package manager.
+
+<Warning>
+  32-bit operating systems are not supported on any platform. Make sure you are running a 64-bit OS before proceeding. Windows users must use Python **below 3.14** — `pythonnet` is not yet compatible with Python 3.14+.
+</Warning>
+
+<Tabs>
+  <Tab title="Linux">
+    <Steps>
+      <Step title="Install via PyPI (Recommended)">
+        First, upgrade `pip` to avoid permission issues during installation:
+
+        ```bash
+        python3 -m pip install -U pip --user
+        ```
+
+        Then install Legendary:
+
+        ```bash
+        pip install legendary-gl
+        ```
+
+        To enable the optional embedded webview login (recommended for a smoother authentication experience), install the webview extra. On Ubuntu and other GTK-based distros, install the system dependency first:
+
+        ```bash
+        sudo apt install python3-gi-cairo
+        pip install legendary-gl[webview]
+        ```
+
+        Alternatively, the GTK backend can be installed directly — this may require you to manually install dependencies needed to build `PyGObject`:
+
+        ```bash
+        pip install legendary-gl[webview_gtk]
+        ```
+
+        <Note>
+          Using pywebview's Qt engine may not work correctly. If the `legendary` command is not found after installation, add `~/.local/bin` to your PATH (see Step 2).
+        </Note>
+      </Step>
+
+      <Step title="Add Legendary to your PATH">
+        If the `legendary` executable is not found after a `pip install --user` installation, add the local bin directory to your shell's `PATH`:
+
+        ```bash
+        echo 'export PATH=$PATH:~/.local/bin' >> ~/.profile && source ~/.profile
+        ```
+      </Step>
+
+      <Step title="Alternative: Prebuilt standalone binary">
+        If you prefer not to install Python, download the prebuilt `legendary` binary from the [latest GitHub release](https://github.com/legendary-gl/legendary/releases/latest).
+
+        Move the binary to a directory that is already on your `PATH`, then make it executable:
+
+        ```bash
+        chmod +x legendary
+        mv legendary ~/.local/bin/legendary
+        ```
+
+        <Note>
+          The Linux prebuilt binary is created with PyInstaller and requires **glibc ≥ 2.25**. Older distributions such as Ubuntu 16.04 or Debian Stretch are not supported by this method.
+        </Note>
+      </Step>
+
+      <Step title="Alternative: Linux package managers">
+        Several distributions ship community-maintained Legendary packages. Note that third-party packages may lag behind the latest release — use PyPI if you always want the newest version.
+
+        | Distribution | Repository |
+        |---|---|
+        | Arch Linux | AUR (`legendary`) |
+        | Fedora | Official repositories |
+        | openSUSE | Official repositories |
+        | Gentoo | Third-party overlay |
+
+        See the [Available Linux Packages](https://github.com/derrod/legendary/wiki/Available-Linux-Packages) wiki page for installation details for each distro.
+      </Step>
+
+      <Step title="Alternative: Install from source (dev/testing)">
+        Clone the repository and use `uv` to set up the environment. This installs Legendary in non-editable mode:
+
+        ```bash
+        git clone https://github.com/derrod/legendary.git
+        cd legendary
+        uv sync --no-editable
+        ```
+
+        For development (editable mode), where any changes to the source code take effect immediately:
+
+        ```bash
+        uv sync
+        ```
+
+        See the [uv installation docs](https://docs.astral.sh/uv/getting-started/installation/) to install `uv` if you do not have it yet.
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="macOS">
+    <Steps>
+      <Step title="Install via PyPI (Recommended)">
+        macOS 12.0 or later is required. First, upgrade `pip`:
+
+        ```bash
+        python3 -m pip install -U pip --user
+        ```
+
+        Then install Legendary:
+
+        ```bash
+        pip install legendary-gl
+        ```
+
+        To enable the webview login extra:
+
+        ```bash
+        pip install legendary-gl[webview]
+        ```
+
+        <Note>
+          pywebview is currently **unsupported on macOS**. The webview optional dependency is available but may not function correctly. Use the standard browser-based authorization code login instead.
+        </Note>
+      </Step>
+
+      <Step title="Add Legendary to your PATH">
+        If the `legendary` command is not found after installation, add the local pip bin directory to your PATH:
+
+        ```bash
+        echo 'export PATH=$PATH:~/.local/bin' >> ~/.profile && source ~/.profile
+        ```
+
+        You may need to restart your terminal or run `source ~/.zshrc` / `source ~/.bash_profile` depending on your shell.
+      </Step>
+
+      <Step title="Alternative: Prebuilt standalone binary">
+        Download the prebuilt `legendary` binary (no `.exe` extension) from the [latest GitHub release](https://github.com/legendary-gl/legendary/releases/latest).
+
+        Move it to a directory on your `PATH` and mark it executable:
+
+        ```bash
+        chmod +x legendary
+        mv legendary /usr/local/bin/legendary
+        ```
+
+        The binary is built with PyInstaller and does not require Python to be installed.
+      </Step>
+
+      <Step title="Alternative: Install from source (dev/testing)">
+        Clone the repository and use `uv` to set up the environment:
+
+        ```bash
+        git clone https://github.com/derrod/legendary.git
+        cd legendary
+        uv sync --no-editable
+        ```
+
+        For development (editable mode):
+
+        ```bash
+        uv sync
+        ```
+
+        See the [uv installation docs](https://docs.astral.sh/uv/getting-started/installation/) for setup instructions.
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="Windows">
+    <Steps>
+      <Step title="Install via PyPI (Recommended)">
+        Windows 8.1 or later (64-bit) is required. Python must be **below version 3.14** due to a `pythonnet` incompatibility.
+
+        Open PowerShell or Command Prompt and upgrade `pip`:
+
+        ```bash
+        py -3 -m pip install -U pip --user
+        ```
+
+        Then install Legendary:
+
+        ```bash
+        pip install legendary-gl
+        ```
+
+        To enable the optional embedded webview login window:
+
+        ```bash
+        pip install legendary-gl[webview]
+        ```
+      </Step>
+
+      <Step title="Alternative: Prebuilt standalone binary (no Python required)">
+        Download `legendary.exe` from the [latest GitHub release](https://github.com/legendary-gl/legendary/releases/latest).
+
+        Move `legendary.exe` to a folder that is included in your `%PATH%` environment variable, for example `C:\Windows\System32` or a custom tools folder you have added to your user `PATH`.
+
+        The `.exe` is built with PyInstaller and runs without Python being installed on your system. Versions 0.20.14 and higher will open a native login window automatically when you run `legendary auth`.
+
+        <Note>
+          When using PowerShell with the standalone executable, you may need to prefix the command with `.\` — for example, use `.\legendary auth` instead of `legendary auth` if the command is not found.
+        </Note>
+      </Step>
+
+      <Step title="Alternative: Install from source (dev/testing)">
+        Clone the repository and use `uv` to install:
+
+        ```bash
+        git clone https://github.com/derrod/legendary.git
+        cd legendary
+        uv sync --no-editable
+        ```
+
+        For development (editable mode), where source changes take effect immediately:
+
+        ```bash
+        uv sync
+        ```
+
+        See the [uv installation docs](https://docs.astral.sh/uv/getting-started/installation/) for how to install `uv` on Windows.
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Verify the Installation
+
+Once installed, confirm Legendary is working by checking the version:
+
+```bash
+legendary --version
+```
+
+You should see output like `Legendary vX.X.X - "Codename"`. If the command is not found, revisit the PATH setup step for your platform. You are now ready to [authenticate and start playing](/quickstart).

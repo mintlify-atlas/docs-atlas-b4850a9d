@@ -1,0 +1,146 @@
+---
+title: "Sync Cloud Saves with Epic Games Cloud"
+sidebarTitle: "Cloud Saves"
+description: "Upload and download save games to the Epic cloud using Legendary. Sync all games at once or manage saves for individual titles."
+---
+
+Legendary supports bidirectional cloud save synchronisation with Epic's save game service, fully compatible with the Epic Games Launcher. Saves stored in the cloud can be downloaded to your local machine and local saves can be uploaded back — changes made in either Legendary or EGL will be visible on both sides. Not every game on Epic supports cloud saves; the feature must be enabled by the developer.
+
+<Note>
+  The first time you run `sync-saves` for a newly installed game, Legendary will ask you to confirm or manually enter the path where that game stores its save files. Once confirmed, the path is saved in `~/.config/legendary/config.ini` under the game's app name section so future syncs run automatically.
+</Note>
+
+## Syncing Saves
+
+**Sync all supported games (upload or download based on which is newer):**
+
+```bash
+legendary sync-saves
+```
+
+**Sync a single game:**
+
+```bash
+legendary sync-saves <App Name>
+```
+
+Legendary compares the local and remote timestamps and transfers whichever side is newer. If both sides are at the same age, no transfer is performed.
+
+## Forcing a Direction
+
+When you need to push or pull regardless of timestamps:
+
+<CodeGroup>
+```bash Force Upload
+# Upload local saves even if the remote copy is newer
+legendary sync-saves --force-upload
+```
+
+```bash Force Download
+# Download remote saves even if local copies are newer
+legendary sync-saves --force-download
+```
+</CodeGroup>
+
+## One-Way Sync
+
+To restrict the operation to a single direction without forcing:
+
+<CodeGroup>
+```bash Download Only
+# Skip uploading; only download from the cloud
+legendary sync-saves --skip-upload
+```
+
+```bash Upload Only
+# Skip downloading; only upload to the cloud
+legendary sync-saves --skip-download
+```
+</CodeGroup>
+
+## Overriding the Save Path
+
+If a game's save path was stored incorrectly, or you want to use a non-default location for a single run, specify the path explicitly. The app name is required when using `--save-path`:
+
+```bash
+legendary sync-saves --save-path /path/to/saves <App Name>
+```
+
+## Additional Options
+
+**Accept the auto-detected path without prompting:**
+
+```bash
+legendary sync-saves --accept-path <App Name>
+```
+
+**Disable filename filters** (sync all files in the save directory, not just those matching the game's known patterns):
+
+```bash
+legendary sync-saves --disable-filters
+```
+
+## Listing and Downloading Cloud Saves
+
+**List all save files stored in the cloud:**
+
+```bash
+legendary list-saves
+```
+
+**List saves for a specific game:**
+
+```bash
+legendary list-saves <App Name>
+```
+
+**Download all cloud saves without merging them into the active save directory:**
+
+```bash
+legendary download-saves
+```
+
+**Download saves for a specific game:**
+
+```bash
+legendary download-saves <App Name>
+```
+
+## Cleaning Up Saves
+
+Over time incomplete or orphaned save data can accumulate in the cloud. To review and clean up these files:
+
+```bash
+legendary clean-saves
+```
+
+**Clean saves for a specific game:**
+
+```bash
+legendary clean-saves <App Name>
+```
+
+**Permanently delete incomplete saves during the cleanup:**
+
+```bash
+legendary clean-saves --delete-incomplete
+```
+
+<Warning>
+  `--delete-incomplete` permanently removes data from the Epic cloud. Use it only if you are certain the incomplete saves are not needed.
+</Warning>
+
+## Save Path Configuration
+
+After the first successful sync for each game, Legendary stores the confirmed save path in your `config.ini`:
+
+```ini
+[AppName]
+save_path = /home/user/.local/share/SomeGame/Saves
+```
+
+You can also set the save path at install time so that `sync-saves` works immediately after installation:
+
+```bash
+legendary install <App Name> --save-path /path/to/saves
+```

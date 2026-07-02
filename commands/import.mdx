@@ -1,0 +1,70 @@
+---
+title: "legendary import — Import an Installed Epic Game"
+sidebarTitle: "import"
+description: "legendary import registers an already-installed Epic game with Legendary. Performs a full file verification so Legendary can manage updates correctly."
+---
+
+`legendary import` registers a game that was previously installed by the Epic Games Launcher (or by any other means) into Legendary's database, so that Legendary can manage it going forward — running updates, syncing saves, and tracking the installation. Because Legendary needs an accurate picture of which files are present and their checksums to compute future delta updates, the import process performs a full file verification. This verification can take some time on large games but only needs to happen once.
+
+## Usage
+
+```
+legendary import [-h] [--disable-check] [--with-dlcs] [--skip-dlcs] [--platform <Platform>] <App Name> <Installation directory>
+```
+
+The `<App Name>` is the Epic app name (as shown by `legendary list`). The `<Installation directory>` is the full path to the folder where the game is currently installed.
+
+## Flags
+
+<ResponseField name="--disable-check" type="flag">
+  Skip the completeness verification of the existing installation. Useful when importing a much older game version or an installation with known missing files. Without a successful verification, delta updates may not work correctly.
+</ResponseField>
+
+<ResponseField name="--with-dlcs" type="flag">
+  Automatically attempt to import all DLCs associated with the base game without prompting.
+</ResponseField>
+
+<ResponseField name="--skip-dlcs" type="flag">
+  Do not ask about importing DLCs; import the base game only.
+</ResponseField>
+
+<ResponseField name="--platform <Platform>" type="string">
+  Platform for the import. Defaults to **Mac** when running on macOS, otherwise **Windows**.
+</ResponseField>
+
+## Examples
+
+```bash
+# Import a game from its existing installation directory
+legendary import Anemone /mnt/games/Epic/WorldOfGoo
+
+# Import using a partial title match (use quotes for multi-word names)
+legendary import "world of goo" /mnt/games/Epic/WorldOfGoo
+
+# Import the base game and all DLCs automatically
+legendary import Anemone /mnt/games/Epic/WorldOfGoo --with-dlcs
+
+# Import without running the completeness check (older/incomplete install)
+legendary import Anemone /mnt/games/Epic/WorldOfGoo --disable-check
+
+# Import a Windows game from a macOS machine
+legendary import Anemone /mnt/games/Epic/WorldOfGoo --platform Windows
+```
+
+## Notes
+
+<Note>
+  Importing requires a full file verification pass so that Legendary can correctly compute delta updates in the future. This is a one-time cost — subsequent updates will use efficient delta patching.
+</Note>
+
+<Warning>
+  Using `--disable-check` skips verification and can leave Legendary with an inaccurate picture of the installed files. Delta updates may download more data than expected, or fail to apply correctly, if the import is incomplete.
+</Warning>
+
+<Tip>
+  To import a game that was installed through the Epic Games Launcher on Windows and is now accessible on Linux (e.g. via a shared drive or Wine prefix), specify `--platform Windows` so Legendary uses the correct manifest.
+</Tip>
+
+<Tip>
+  If you need to import a game that was moved to a new location after its original install, point `<Installation directory>` at the current path. There is no need to move it back first.
+</Tip>

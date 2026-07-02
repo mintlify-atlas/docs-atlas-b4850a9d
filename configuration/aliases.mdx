@@ -1,0 +1,182 @@
+---
+title: "Game Aliases in Legendary"
+sidebarTitle: "Aliases"
+description: "Create short, memorable aliases for Epic Games app names. Use auto-generated or custom aliases to simplify launching and managing games."
+---
+
+Epic Games titles have internal app names that are often opaque strings — sometimes a short codename like `Eider` (HITMAN 3), sometimes a long alphanumeric hash like `9d2d0eb64d5c44529cece33fe2a46482`. Typing these exactly every time you want to install or launch a game is tedious and error-prone. Legendary's alias system solves this by letting you refer to any game using short, memorable names. Aliases are resolved transparently — every command that accepts an app name (`install`, `launch`, `uninstall`, `verify`, `move`, `info`, and others) will accept an alias in its place.
+
+---
+
+## Auto-Generated Aliases
+
+Unless disabled, Legendary automatically generates a set of aliases for every game in your library and caches them in `~/.config/legendary/aliases.json`. These are regenerated whenever your game list changes. Auto-generated aliases are **always lowercase** and include several variants derived from the game's title:
+
+- The full lowercase title (e.g. `world of goo`)
+- The title with special characters removed (e.g. `world of goo`)
+- A no-spaces version (e.g. `worldofgoo`)
+- Initials / abbreviation (e.g. `wog`)
+- Roman numerals replaced with digits (e.g. `gta5` for *Grand Theft Auto V*)
+- The first significant word of the title (skipping "the", "of", "for")
+- The game's folder name, if different from the title
+- The lowercase Epic app name itself
+
+For titles with subtitles (separated by `:`), aliases are also generated from the part before the colon.
+
+<Note>
+  When two different games would produce the same auto-generated alias (a **collision**), that alias is dropped from the automatic list entirely. It will not be assigned to either game. You can still create a custom alias for one of them manually.
+</Note>
+
+To disable automatic alias generation entirely, set `disable_auto_aliasing = true` in the `[Legendary]` section of your `config.ini`:
+
+```ini
+[Legendary]
+disable_auto_aliasing = true
+```
+
+---
+
+## Custom Aliases
+
+You can define your own aliases in the `[Legendary.aliases]` section of `config.ini`. Each line maps an alias to an exact Epic app name:
+
+```ini
+[Legendary.aliases]
+; Format: <alias> = <exact Epic app name>
+hitman3 = Eider
+gtav = 9d2d0eb64d5c44529cece33fe2a46482
+```
+
+Custom aliases **take priority over** auto-generated ones. This means you can override a collision or create a shorthand that is more natural to you. The alias is case-insensitive when Legendary resolves it, but the app name on the right-hand side is case-sensitive.
+
+<Tip>
+  Use `legendary list` or `legendary list-installed` to find the exact app name for a game before adding a custom alias.
+</Tip>
+
+---
+
+## Managing Aliases with `legendary alias`
+
+Legendary provides an `alias` subcommand with four actions so you can manage your custom aliases without editing `config.ini` by hand.
+
+### `legendary alias add`
+
+Add a new custom alias for a game. The app name argument also accepts an existing alias or partial title match.
+
+```bash
+legendary alias add <App Name> <alias>
+```
+
+```bash
+# Add alias "h3" for HITMAN 3 (app name: Eider)
+legendary alias add Eider h3
+
+# You can also use the game's display title
+legendary alias add "HITMAN 3" h3
+```
+
+### `legendary alias rename`
+
+Rename an existing **custom** alias. This only works on aliases stored in `[Legendary.aliases]`; auto-generated aliases cannot be renamed (create a custom alias instead).
+
+```bash
+legendary alias rename <old alias> <new alias>
+```
+
+```bash
+legendary alias rename h3 hitman3
+```
+
+### `legendary alias remove`
+
+Remove a custom alias from `[Legendary.aliases]`.
+
+```bash
+legendary alias remove <alias>
+```
+
+```bash
+legendary alias remove hitman3
+```
+
+### `legendary alias list`
+
+List aliases. Without an argument, prints all user-defined aliases from `[Legendary.aliases]`. With a game's app name or alias, prints both user-defined and automatically generated aliases for that specific game.
+
+```bash
+# List all user-defined aliases
+legendary alias list
+
+# List all aliases (user-defined and auto-generated) for a specific game
+legendary alias list Eider
+legendary alias list h3
+```
+
+Example output for `legendary alias list Eider`:
+
+```text
+Aliases for "HITMAN 3" (Eider):
+- User-defined aliases:
+  + h3
+  + hitman3
+- Automatic aliases:
+  + eider
+  + hitman
+  + hitman3
+```
+
+---
+
+## Using Aliases in Commands
+
+Once an alias exists (either custom or auto-generated), you can use it anywhere an app name is accepted:
+
+```bash
+# Install using an auto-generated alias
+legendary install wog
+
+# Launch using a custom alias
+legendary launch h3
+
+# Verify using an alias
+legendary verify gtav
+
+# Partial title strings also work (no alias required)
+legendary install "world of goo"
+legendary launch "hitman"
+```
+
+<Note>
+  Aliases containing spaces must be quoted in your shell. For example:
+
+  ```bash
+  legendary launch "world of goo"
+  ```
+</Note>
+
+---
+
+## Alias Resolution Order
+
+When you provide a name to a Legendary command, it is resolved in this order:
+
+1. **Exact app name match** — checked first; if the string is a known app name, it is used directly.
+2. **Custom alias** — looked up in the `[Legendary.aliases]` section of `config.ini`.
+3. **Auto-generated alias** — looked up in the in-memory alias table loaded from `aliases.json`.
+4. **Original string** — if no alias matches, the string is used as-is (will fail if no such app exists).
+
+---
+
+## Related Pages
+
+<CardGroup cols={3}>
+  <Card title="Config File Reference" icon="file-lines" href="/configuration/config-file">
+    Full reference for all config.ini sections, including [Legendary.aliases].
+  </Card>
+  <Card title="legendary alias command" icon="terminal" href="/commands/alias">
+    Complete command reference for legendary alias add, rename, remove, and list.
+  </Card>
+  <Card title="legendary list" icon="list" href="/commands/list">
+    Find exact Epic app names to use when creating aliases.
+  </Card>
+</CardGroup>

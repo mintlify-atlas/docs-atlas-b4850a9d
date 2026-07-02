@@ -1,0 +1,49 @@
+---
+title: "legendary cleanup — Remove Temporary and Old Files"
+sidebarTitle: "cleanup"
+description: "legendary cleanup deletes old temporary files, metadata, and manifest files from Legendary's cache directory to free up disk space."
+---
+
+`legendary cleanup` removes stale files that accumulate in Legendary's data directory over time — temporary download chunks, outdated metadata, and (optionally) old manifest files. Running it periodically keeps disk usage in check without affecting installed games or your configuration. The command is safe to run at any time when no install or update is in progress.
+
+## Usage
+
+```
+legendary cleanup [-h] [--keep-manifests]
+```
+
+## Options
+
+| Flag | Description |
+|---|---|
+| `--keep-manifests` | Skip deletion of old manifest files; all other temporary and metadata files are still removed |
+
+## Examples
+
+Full cleanup — remove all temporary files, metadata, and old manifests:
+
+```bash
+legendary cleanup
+```
+
+Cleanup while preserving manifest files:
+
+```bash
+legendary cleanup --keep-manifests
+```
+
+## What Gets Cleaned
+
+The following types of files are targeted by `cleanup`:
+
+- **Temporary download files** — partial chunk data left behind by interrupted or completed installs.
+- **Old metadata** — cached game asset information that is no longer current.
+- **Old manifest files** — binary or JSON manifests from previous game versions (unless `--keep-manifests` is passed).
+
+<Note>
+  Manifest files are small but useful for inspecting update history or downgrading games manually. If you ever need to reference an older game version, pass `--keep-manifests` to preserve them. They do not meaningfully affect disk usage for most users.
+</Note>
+
+<Tip>
+  If a Legendary installation or update operation was interrupted ungracefully, running `legendary cleanup` before retrying can clear out stale temporary data that might otherwise interfere with the resume mechanism.
+</Tip>

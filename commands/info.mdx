@@ -1,0 +1,68 @@
+---
+title: "legendary info — Show Game Information"
+sidebarTitle: "info"
+description: "legendary info prints detailed metadata about an Epic game or manifest, including version, size, DLCs, and launch parameters. Supports JSON output."
+---
+
+`legendary info` fetches and displays detailed metadata about a game — including its version, install size, available DLCs, and launch configuration. You can query by app name (looking up the game from your Epic account) or pass a local manifest file path or a remote manifest URL directly, making it useful for inspecting specific game versions without installing them. Pass `--offline` to view cached information without requiring an internet connection.
+
+## Usage
+
+```
+legendary info [-h] [--offline] [--json] [--platform <Platform>] <App Name/Manifest URI>
+```
+
+The argument can be:
+- An **app name** as shown by `legendary list` (e.g. `Anemone`)
+- A **local path** to a `.manifest` file
+- A **remote URL** pointing to a manifest
+
+## Flags
+
+<ResponseField name="--offline" type="flag">
+  Only display information available from Legendary's local cache. No network requests are made. Useful when you are offline or want a quick lookup without triggering a metadata fetch.
+</ResponseField>
+
+<ResponseField name="--json" type="flag">
+  Output all game information as JSON. Useful for scripting or piping into other tools.
+</ResponseField>
+
+<ResponseField name="--platform <Platform>" type="string">
+  Platform to fetch information for. Defaults to the already-installed platform if the game is installed, then **Mac** on macOS, or **Windows** otherwise.
+</ResponseField>
+
+## Examples
+
+```bash
+# Show information about an installed or available game
+legendary info Anemone
+
+# Output game information as JSON
+legendary info Anemone --json
+
+# Show only locally cached information (no network)
+legendary info Anemone --offline
+
+# Show information for the Mac platform build
+legendary info Anemone --platform Mac
+
+# Inspect a local manifest file
+legendary info /path/to/game.manifest
+
+# Inspect a remote manifest by URL
+legendary info https://example.com/manifests/game.manifest
+```
+
+## Notes
+
+<Note>
+  When querying by app name, `legendary info` contacts Epic's API to fetch the latest manifest unless `--offline` is specified. This means the command requires a valid login session unless you use `--offline`.
+</Note>
+
+<Tip>
+  Combine `--json` with a tool like `jq` to extract specific fields from the output — for example, the install size or the list of DLCs — in shell scripts or automation workflows.
+</Tip>
+
+<Tip>
+  Passing a manifest URI (local path or URL) lets you inspect any game version, not just the currently available one. This is useful for checking what files a specific build contains before deciding to install or downgrade.
+</Tip>

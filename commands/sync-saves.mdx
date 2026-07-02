@@ -1,0 +1,82 @@
+---
+title: "legendary sync-saves — Sync Cloud Saves with Epic"
+sidebarTitle: "sync-saves"
+description: "legendary sync-saves uploads and downloads save games to the Epic cloud. Supports force upload/download, one-way sync, save path override, and per-game sync."
+---
+
+`legendary sync-saves` compares your local save game files against those stored in Epic's cloud and synchronises them in whichever direction is needed. By default it processes every installed game that supports cloud saves, though you can narrow the operation to a single title by passing its App Name. On the first run for any game, Legendary will compute the expected save path and ask you to confirm (or correct) it before syncing.
+
+## Usage
+
+```
+legendary sync-saves [-h] [--skip-upload] [--skip-download] [--force-upload] [--force-download] [--save-path <path>] [--disable-filters] [<App Name>]
+```
+
+## Positional Arguments
+
+| Argument | Description |
+|---|---|
+| `<App Name>` | App name of the game to sync (optional — if omitted, all supported installed games are synced) |
+
+## Options
+
+| Flag | Description |
+|---|---|
+| `--skip-upload` | Only download new saves from the cloud; do not upload local saves |
+| `--skip-download` | Only upload new saves to the cloud; do not download from cloud |
+| `--force-upload` | Force an upload even if local saves are older than the cloud copy |
+| `--force-download` | Force a download even if local saves are newer than the cloud copy |
+| `--save-path <path>` | Override the save game path for this session (requires a single App Name to be specified) |
+| `--disable-filters` | Disable save game file filtering when uploading |
+
+<Note>
+  `--skip-upload` and `--skip-download` are mutually exclusive in effect — combining both would mean no data is transferred. Use one or the other when you intentionally want a one-way sync.
+</Note>
+
+## Examples
+
+Sync all installed games that support cloud saves:
+
+```bash
+legendary sync-saves
+```
+
+Sync a single game:
+
+```bash
+legendary sync-saves Anemone
+```
+
+Force an upload regardless of timestamps (useful after a local restore):
+
+```bash
+legendary sync-saves --force-upload Anemone
+```
+
+Upload only — skip downloading anything from the cloud:
+
+```bash
+legendary sync-saves --skip-download Anemone
+```
+
+Override the save path for this run (the path is also saved for future syncs):
+
+```bash
+legendary sync-saves --save-path ~/.saves/Anemone Anemone
+```
+
+## Save Path Confirmation
+
+<Note>
+  The first time you run `sync-saves` for a game, Legendary will compute the expected save path from the game's metadata and ask you to confirm it is correct. If the computed path contains unresolved variables (shown as `%VARIABLE%` or `{variable}`), you will be prompted to enter the path manually. The confirmed path is stored in Legendary's installed-games database so subsequent syncs require no interaction.
+</Note>
+
+## Global `-y` Flag
+
+Passing `-y` (or `--yes`) at the global level before the command skips all interactive prompts. When combined with `sync-saves`, games whose save paths have not yet been confirmed are **skipped** rather than prompted:
+
+```bash
+legendary -y sync-saves
+```
+
+This is useful in scripts or automated setups where you do not want unexpected blocking prompts.

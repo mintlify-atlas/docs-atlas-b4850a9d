@@ -1,0 +1,79 @@
+---
+title: "legendary eos-overlay — Manage the EOS Overlay"
+sidebarTitle: "eos-overlay"
+description: "legendary eos-overlay installs, updates, removes, enables, and disables the Epic Online Services overlay. Supports WINE prefix and per-app configuration."
+---
+
+`legendary eos-overlay` manages the Epic Online Services (EOS) overlay, which provides in-game UI elements such as friend lists and notifications for EOS-enabled titles. The command handles the full lifecycle of the overlay — downloading and installing it, enabling or disabling it globally or for a specific WINE prefix, and removing it entirely when no longer needed. On Linux and macOS the overlay is wired into a WINE prefix via registry entries; the `--prefix`, `--app`, and `--bottle` flags give you fine-grained control over which prefix is targeted.
+
+## Usage
+
+```
+legendary eos-overlay [-h] [--path PATH] [--prefix PREFIX] [--app APP] [--bottle BOTTLE] <install|update|remove|enable|disable|info>
+```
+
+## Actions
+
+| Action | Description |
+|---|---|
+| `install` | Download and install the EOS overlay from Epic's CDN |
+| `update` | Update the overlay to the latest available version |
+| `remove` | Remove the overlay installation |
+| `enable` | Register the overlay in a WINE prefix so it is loaded by games |
+| `disable` | Deregister the overlay from a WINE prefix |
+| `info` | Print information about the currently installed overlay |
+
+## Options
+
+| Flag | Description |
+|---|---|
+| `--path <path>` | Path to the EOS overlay folder to install into or enable from |
+| `--prefix <path>` | WINE prefix in which to register or deregister the overlay |
+| `--app <App Name>` | Use the WINE prefix configured for this app in Legendary's config (requires the app to have `wine_prefix` set) |
+| `--bottle <bottle>` | WINE bottle name to use (macOS CrossOver) |
+
+## Examples
+
+Install the overlay for the first time:
+
+```bash
+legendary eos-overlay install
+```
+
+Update to the latest overlay version:
+
+```bash
+legendary eos-overlay update
+```
+
+Enable the overlay in a specific WINE prefix:
+
+```bash
+legendary eos-overlay enable --prefix ~/.wine
+```
+
+Enable the overlay using the WINE prefix configured for a specific game:
+
+```bash
+legendary eos-overlay enable --app Anemone
+```
+
+Show information about the installed overlay:
+
+```bash
+legendary eos-overlay info
+```
+
+Remove the overlay entirely:
+
+```bash
+legendary eos-overlay remove
+```
+
+<Note>
+  The `enable` and `disable` actions write to or remove from the Windows registry inside the target WINE prefix. You must specify a prefix using `--prefix`, `--app`, or `--bottle` when running these actions, otherwise Legendary cannot determine which prefix to modify.
+</Note>
+
+<Tip>
+  If you manage multiple games in different WINE prefixes, run `eos-overlay enable --app <App Name>` for each game individually. Legendary will look up the `wine_prefix` value from that app's section in `config.ini` and apply the registry changes to the correct prefix automatically.
+</Tip>

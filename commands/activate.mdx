@@ -1,0 +1,46 @@
+---
+title: "legendary activate — Activate Games on Third-Party Launchers"
+sidebarTitle: "activate"
+description: "legendary activate registers Epic Games titles on Ubisoft Connect or EA/Origin accounts, removing the need to use the Epic Games Launcher for activation."
+---
+
+`legendary activate` handles the one-time account-linking step required for certain Epic Games Store titles that are managed by a third-party platform. Some games purchased on Epic (such as Ubisoft Connect titles) need to be registered on a separate account before they can be installed or launched. This command automates that activation process so you never need to open the Epic Games Launcher to complete it. Exactly one platform flag must be provided.
+
+## Usage
+
+```
+legendary activate [-h] (-U | -O)
+```
+
+## Options
+
+| Flag | Description |
+|---|---|
+| `-U`, `--uplay` | Activate Uplay / Ubisoft Connect titles on your Ubisoft account. The Uplay client does **not** need to be installed to run this activation. |
+| `-O`, `--origin` | Activate Origin / EA App managed titles on your EA account. Requires Origin to be installed on the system. |
+
+<Note>
+  Exactly one of `-U` or `-O` must be specified. Omitting both (or specifying both) is an error.
+</Note>
+
+## Examples
+
+Activate Ubisoft Connect games linked to your Epic account:
+
+```bash
+legendary activate --uplay
+```
+
+Activate Origin / EA App games linked to your Epic account:
+
+```bash
+legendary activate --origin
+```
+
+## When You Need This Command
+
+Not all Epic titles require activation. You can check whether a game needs it by running `legendary list --third-party` and looking for entries that mention Ubisoft or Origin, or by running `legendary info <App Name>` and checking the "Activates on external platform" field.
+
+<Tip>
+  For Ubisoft Connect games, after activation you can install and launch the game directly through Ubisoft Connect without further involvement from Legendary or the Epic Games Launcher. For Origin/EA App games, Origin must remain installed since it handles the actual game files.
+</Tip>

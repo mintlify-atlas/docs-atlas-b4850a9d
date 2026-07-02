@@ -1,0 +1,39 @@
+---
+title: "legendary uninstall — Remove an Installed Epic Game"
+sidebarTitle: "uninstall"
+description: "legendary uninstall removes an installed Epic game from disk. Use --keep-files to remove from Legendary's database without deleting files."
+---
+
+`legendary uninstall` removes a game that was installed through Legendary, deleting the game files from disk and removing the game's entry from Legendary's local database. If you have already deleted the files manually (or moved them with an external tool), you can use `--keep-files` to clean up only the database record without touching the filesystem.
+
+## Usage
+
+```
+legendary uninstall [-h] [--keep-files] <App Name>
+```
+
+## Flags
+
+<ResponseField name="--keep-files" type="flag">
+  Remove the game from Legendary's database but leave all files on disk untouched. Useful when you want to free up the tracked entry (for example, after manually deleting or relocating files) without waiting for a potentially large file deletion.
+</ResponseField>
+
+## Examples
+
+```bash
+# Fully uninstall a game and delete all its files
+legendary uninstall Anemone
+
+# Remove a game from Legendary's database without deleting its files
+legendary uninstall Anemone --keep-files
+```
+
+## Notes
+
+<Warning>
+  Uninstalling a game with Legendary only removes the game files and the Legendary database entry. Any save games stored locally are **not** deleted, but you should back them up before uninstalling if you plan to reinstall later.
+</Warning>
+
+<Tip>
+  If you moved the game folder manually and want to re-register it with Legendary, use `legendary import` rather than uninstalling and reinstalling. Alternatively, use `legendary move` to let Legendary handle the relocation automatically.
+</Tip>

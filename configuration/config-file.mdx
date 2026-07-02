@@ -1,0 +1,254 @@
+---
+title: "Legendary Configuration File Reference"
+sidebarTitle: "Config File"
+description: "Configure Legendary's global settings, per-game options, environment variables, and macOS preferences using the config.ini file."
+---
+
+Legendary stores all persistent configuration in a single INI-format file called `config.ini`. The file is divided into named sections — a global `[Legendary]` section for application-wide settings, a `[default]` section for game-launch defaults that apply to every title unless overridden, and per-app sections identified by the game's Epic app name (e.g. `[AppName]`). You can also define environment variables for individual games using `[AppName.env]` sections. Any value you set here persists across runs and avoids having to pass flags on every command invocation.
+
+## Config File Location
+
+By default, Legendary reads and writes its configuration at:
+
+```text
+~/.config/legendary/config.ini
+```
+
+The location is resolved in priority order:
+
+1. **`LEGENDARY_CONFIG_PATH` environment variable** — if set, Legendary uses this directory as the entire config root (the `config.ini` will be at `$LEGENDARY_CONFIG_PATH/config.ini`)
+2. **`XDG_CONFIG_HOME` environment variable** — if set, Legendary creates a `legendary/` subfolder inside it (`$XDG_CONFIG_HOME/legendary/config.ini`)
+3. **Default fallback** — `~/.config/legendary/config.ini`
+
+You can also supply a custom config file path (or filename relative to the config directory) with the `-c` / `--config-file` global flag:
+
+```bash
+legendary -c /path/to/my-config.ini list
+```
+
+<Note>
+  If the config file is modified externally while Legendary is running, Legendary will rename the on-disk file to `config.<mtime>.ini` before writing its own changes so you don't lose anything.
+</Note>
+
+---
+
+## Full Example
+
+Below is an annotated `config.ini` showing every supported option across all sections. Sections and options you do not need can be omitted entirely — Legendary uses sensible defaults for anything not present.
+
+```ini
+[Legendary]
+log_level = debug
+max_memory = 2048
+max_workers = 8
+install_dir = /mnt/tank/games
+locale = en-US
+egl_sync = false
+egl_programdata = /home/user/Games/epic-games-store/drive_c/ProgramData/Epic/EpicGamesLauncher/Data/Manifests
+preferred_cdn = epicgames-download1.akamaized.net
+disable_https = false
+disable_update_check = false
+disable_update_notice = false
+disable_auto_aliasing = false
+
+; macOS-specific settings
+default_platform = Windows
+install_platform_fallback = true
+disable_auto_crossover = false
+mac_install_dir = /Users/legendary/Applications
+
+[Legendary.aliases]
+; Aliases to app names, in the format: <alias> = <app name>
+HITMAN 3 = Eider
+gtav = 9d2d0eb64d5c44529cece33fe2a46482
+
+[default]
+wrapper = gamemode
+wine_executable = wine
+wine_prefix = /home/user/.wine
+crossover_app = /Applications/CrossOver.app
+crossover_bottle = Legendary
+
+[default.env]
+WINEPREFIX = /home/user/legendary/.wine
+
+[AppName]
+offline = true
+skip_update_check = true
+start_params = -windowed
+language = fr
+wine_executable = /path/to/wine64
+wine_prefix = /home/user/.wine
+wrapper = "/path/with spaces/gamemoderun"
+no_wine = true
+override_exe = relative/path/to/file.exe
+disable_sdl = true
+pre_launch_command = /path/to/script.sh
+pre_launch_wait = false
+crossover_app = /Applications/CrossOver Nightly.app
+crossover_bottle = SomethingElse
+
+[AppName.env]
+WINEPREFIX = /mnt/tank/games/Game/.wine
+DXVK_CONFIG_FILE = /mnt/tank/games/Game/dxvk.conf
+```
+
+---
+
+## Section Reference
+
+<AccordionGroup>
+
+  <Accordion title="[Legendary] — Global Application Settings" icon="gear" defaultOpen>
+
+    These options control Legendary's overall behavior and apply to all commands.
+
+    | Option | Type | Default | Description |
+    |---|---|---|---|
+    | `log_level` | `string` | `info` | Logging verbosity. Set to `debug` for verbose output (same as passing `-v` on the command line). |
+    | `max_memory` | `integer` | system memory | Maximum shared memory in **MiB** to use during game installation. Reduce this on memory-constrained systems. |
+    | `max_workers` | `integer` | auto | Maximum number of parallel worker processes used when downloading. Fewer workers use less CPU and RAM but download more slowly. |
+    | `install_dir` | `path` | `~/Games` | Default directory where games are installed when no `--base-path` is provided to `install`. |
+    | `locale` | `string` | system locale | Locale override in RFC 1766 format (e.g. `en-US`, `de-DE`). Controls language selection when fetching game manifests. |
+    | `egl_sync` | `boolean` | `false` | Whether bidirectional sync with the Epic Games Launcher is enabled. Managed via `legendary egl-sync`. |
+    | `egl_programdata` | `path` | — | Full path to the EGL `Manifests` folder inside its ProgramData directory. Required for EGL sync on Linux/macOS running EGL under Wine. |
+    | `preferred_cdn` | `string` | — | Hostname of the preferred CDN to use for downloads (e.g. `epicgames-download1.akamaized.net`). Useful for improving speeds or using a LAN cache. |
+    | `disable_https` | `boolean` | `false` | Disable HTTPS for file downloads. Set to `true` when using a LAN cache that does not support HTTPS (e.g. LanCache.net). |
+    | `disable_update_check` | `boolean` | `false` | Disable the automatic check for new Legendary releases on startup. |
+    | `disable_update_notice` | `boolean` | `false` (GUI/Windows/macOS), `true` (Linux CLI) | Disable the notice printed at exit when a new Legendary version is available. |
+    | `disable_auto_aliasing` | `boolean` | `false` | Disable automatic generation of short aliases from game titles. See the [Aliases](/configuration/aliases) page. |
+
+    **macOS-specific options** (no effect on Linux or Windows):
+
+    | Option | Type | Default | Description |
+    |---|---|---|---|
+    | `default_platform` | `string` | `Mac` on macOS, `Windows` elsewhere | The default platform used when fetching game manifests and installing games. Set to `Windows` to prefer Windows builds. |
+    | `install_platform_fallback` | `boolean` | `true` | When a native Mac version of a game is unavailable, automatically fall back to the Windows platform build. |
+    | `disable_auto_crossover` | `boolean` | `false` | Disable the automatic detection and use of CrossOver for launching Windows games on macOS. |
+    | `mac_install_dir` | `path` | — | Default installation directory for native Mac applications (`.app` packages). |
+
+  </Accordion>
+
+  <Accordion title="[Legendary.aliases] — Custom Aliases" icon="tag">
+
+    The `[Legendary.aliases]` section lets you map short, memorable names to Epic app names. Each entry follows the format `<alias> = <app name>`.
+
+    ```ini
+    [Legendary.aliases]
+    HITMAN 3 = Eider
+    gtav = 9d2d0eb64d5c44529cece33fe2a46482
+    ```
+
+    You can manage this section interactively with the `legendary alias` command instead of editing the file by hand. See the [Aliases](/configuration/aliases) page for full details.
+
+    <Tip>
+      Aliases are case-insensitive when Legendary resolves them. The value on the right-hand side must be the game's exact Epic app name (as shown by `legendary list`).
+    </Tip>
+
+  </Accordion>
+
+  <Accordion title="[default] and [default.env] — Default Game Launch Settings" icon="sliders">
+
+    Options in the `[default]` section apply to **every game** at launch time unless overridden by a game-specific `[AppName]` section. This is useful for setting a global Wine executable, prefix, or wrapper without repeating it for every title.
+
+    | Option | Platform | Description |
+    |---|---|---|
+    | `wrapper` | All | Command to wrap the game executable with. For example `gamemode` (Feral GameMode) or `"/path with spaces/gamemoderun"`. Quote the value if the path contains spaces. |
+    | `wine_executable` | Linux / macOS | Path (or name) of the Wine binary to use. Example: `wine`, `/usr/bin/wine64`. |
+    | `wine_prefix` | Linux / macOS | Path to the Wine prefix directory (equivalent to the `WINEPREFIX` environment variable but applied at a higher level). |
+    | `crossover_app` | macOS | Path to the CrossOver `.app` bundle. Example: `/Applications/CrossOver.app`. |
+    | `crossover_bottle` | macOS | Name of the CrossOver bottle to use. Example: `Legendary`. |
+
+    ```ini
+    [default]
+    wrapper = gamemode
+    wine_executable = wine
+    wine_prefix = /home/user/.wine
+    crossover_app = /Applications/CrossOver.app
+    crossover_bottle = Legendary
+    ```
+
+    **Environment variables** placed in `[default.env]` are exported into the environment of every launched game (overridden by any matching key in a game-specific `[AppName.env]` section):
+
+    ```ini
+    [default.env]
+    WINEPREFIX = /home/user/legendary/.wine
+    ```
+
+  </Accordion>
+
+  <Accordion title="[AppName] and [AppName.env] — Per-Game Settings" icon="gamepad">
+
+    Replace `AppName` with the game's Epic app name exactly as shown by `legendary list`. Settings here override their `[default]` counterparts for that title only.
+
+    | Option | Type | Description |
+    |---|---|---|
+    | `offline` | `boolean` | Launch the game without online authentication by default, as if `--offline` was passed on the command line. |
+    | `skip_update_check` | `boolean` | Skip checking for game updates before launch. |
+    | `start_params` | `string` | Additional command-line arguments passed to the game's executable (in addition to any required Epic arguments). |
+    | `language` | `string` | Two-letter language code (e.g. `fr`, `de`) to use when launching this game, overriding the system locale. |
+    | `wine_executable` | `path` | Override the Wine binary for this specific game. |
+    | `wine_prefix` | `path` | Override the Wine prefix for this specific game. |
+    | `wrapper` | `string` | Wrapper command for this game. Quote the value if the path contains spaces. |
+    | `no_wine` | `boolean` | Do not run this executable through Wine (e.g. when the wrapper itself handles Windows emulation). |
+    | `override_exe` | `relative path` | Override the executable that Legendary launches. The path must be relative to the game's installation directory. Useful for bypassing launchers (e.g. Borderlands). |
+    | `disable_sdl` | `boolean` | Disable Selective Downloading (SDL) for this title, forcing a full install of all game components. |
+    | `pre_launch_command` | `path` | Command to run before launching the game. |
+    | `pre_launch_wait` | `boolean` | Whether to wait for the `pre_launch_command` to finish before launching the game. Defaults to `false`. |
+    | `crossover_app` | `path` | (macOS) Override the CrossOver `.app` bundle path for this game. |
+    | `crossover_bottle` | `string` | (macOS) Override the CrossOver bottle name for this game. |
+
+    **Example:**
+
+    ```ini
+    [AppName]
+    offline = true
+    skip_update_check = true
+    start_params = -windowed
+    language = fr
+    wine_executable = /path/to/wine64
+    wine_prefix = /home/user/games/AppName/.wine
+    no_wine = false
+    override_exe = relative/path/to/file.exe
+    disable_sdl = true
+    pre_launch_command = /path/to/script.sh
+    pre_launch_wait = false
+    crossover_app = /Applications/CrossOver Nightly.app
+    crossover_bottle = SomethingElse
+    ```
+
+    **Per-game environment variables** go in a matching `[AppName.env]` section. These are set in the process environment before the game (or its Wine wrapper) is executed:
+
+    ```ini
+    [AppName.env]
+    WINEPREFIX = /mnt/tank/games/Game/.wine
+    DXVK_CONFIG_FILE = /mnt/tank/games/Game/dxvk.conf
+    ```
+
+    <Tip>
+      Environment variables in `[AppName.env]` take precedence over the same keys in `[default.env]`, so you can set a global Wine prefix in `[default.env]` and selectively override it per game.
+    </Tip>
+
+    <Warning>
+      The app name used as the section heading is **case-sensitive** and must match the app name exactly (e.g. `Anemone`, not `anemone`). Use `legendary list` or `legendary list-installed` to find the correct app name.
+    </Warning>
+
+  </Accordion>
+
+</AccordionGroup>
+
+---
+
+## Related Pages
+
+<CardGroup cols={3}>
+  <Card title="Environment Variables" icon="terminal" href="/configuration/environment-variables">
+    Override Legendary's config path and log level using shell environment variables.
+  </Card>
+  <Card title="Aliases" icon="tag" href="/configuration/aliases">
+    Create and manage short aliases for Epic app names.
+  </Card>
+  <Card title="Wine & Linux" icon="wine-glass" href="/guides/wine-linux">
+    Guide to configuring Wine prefixes and executables for Linux gaming.
+  </Card>
+</CardGroup>

@@ -1,0 +1,149 @@
+---
+title: "Launch Windows Epic Games on macOS with CrossOver"
+sidebarTitle: "CrossOver (macOS)"
+description: "Use CodeWeavers CrossOver to run Windows-only Epic Games on macOS through Legendary. Configure CrossOver app paths, bottles, and per-game settings."
+---
+
+CrossOver is a commercial Wine-based compatibility layer for macOS developed by CodeWeavers. It packages Wine into a polished `.app` bundle and manages isolated Windows environments called "bottles," each with its own registry, drives, and installed software. Because the vast majority of Epic Games titles are Windows-only, Legendary integrates directly with CrossOver on macOS: when `disable_auto_crossover` is not set and a game is installed as a Windows title, Legendary will automatically route its launch through CrossOver. You can configure which CrossOver application and which bottle to use both globally and on a per-game basis.
+
+<Note>
+  CrossOver is a paid commercial product from CodeWeavers. Download it from [codeweavers.com](https://www.codeweavers.com). Legendary does not bundle CrossOver.
+</Note>
+
+## Installing the Windows Platform on macOS
+
+Before using CrossOver with Legendary, make sure your game is installed as a Windows title. On macOS, Legendary defaults to the `Mac` platform when a native macOS version exists. To install a game as a Windows build (required for CrossOver), set the following options in `~/.config/legendary/config.ini`:
+
+```ini
+[Legendary]
+default_platform = Windows
+install_platform_fallback = true
+```
+
+`install_platform_fallback = true` tells Legendary to fall back to `Windows` automatically when no native macOS asset is available for a given title.
+
+## Interactive Setup Wizard
+
+Legendary provides a dedicated `crossover` command that walks you through selecting a CrossOver application and bottle interactively. Run it without an app name to configure global defaults, or pass a specific app name to set per-game options:
+
+<Tabs>
+  <Tab title="Global defaults">
+    ```bash
+    legendary crossover
+    ```
+  </Tab>
+  <Tab title="Per-game">
+    ```bash
+    legendary crossover <App Name>
+    ```
+  </Tab>
+</Tabs>
+
+The wizard scans your system for CrossOver installations using `mdfind` (Spotlight) as well as the default `/Applications/CrossOver.app` path, then lets you pick a bottle from those already created in CrossOver.
+
+### Setup Flags
+
+| Flag | Description |
+|---|---|
+| `--crossover-app <path>` | Skip interactive app selection and use this `.app` directly |
+| `--crossover-bottle <name>` | Skip interactive bottle selection and use this bottle name |
+| `--reset` | Reset CrossOver config for the specified app, or all defaults if no app is given |
+| `--download` | Automatically download and set up a preconfigured bottle (experimental) |
+| `--ignore-version` | Disable the version check when using `--download` |
+
+Example — configure a specific game non-interactively:
+
+```bash
+legendary crossover <App Name> \
+  --crossover-app "/Applications/CrossOver.app" \
+  --crossover-bottle MyBottle
+```
+
+## Launching With CrossOver
+
+Once CrossOver is configured, use `legendary launch` as usual. Legendary detects the CrossOver settings and builds the correct launch command automatically. You can also supply CrossOver options inline:
+
+```bash
+# Use whatever CrossOver config is saved for this game
+legendary launch <App Name>
+
+# Override app and bottle for this session only
+legendary launch <App Name> \
+  --crossover-app "/Applications/CrossOver.app" \
+  --crossover-bottle MyBottle
+```
+
+<Note>
+  If the specified bottle does not exist, Legendary will refuse to launch and display an error. If you are using the default bottle name `Legendary` and it does not exist yet, you will see a message directing you to the setup guide at `https://legendary.gl/crossover-setup`.
+</Note>
+
+## Configuration File
+
+CrossOver settings live in `~/.config/legendary/config.ini`. The `[default]` section sets the global fallback; per-game sections override it:
+
+```ini
+[default]
+crossover_app = /Applications/CrossOver.app
+crossover_bottle = Legendary
+
+[AppName]
+crossover_app = /Applications/CrossOver Nightly.app
+crossover_bottle = SomethingElse
+```
+
+### Disabling Automatic CrossOver
+
+By default, Legendary enables CrossOver automatically on macOS for Windows games. To opt out globally:
+
+```ini
+[Legendary]
+disable_auto_crossover = true
+```
+
+When disabled, you can still invoke CrossOver explicitly for individual launches using `--crossover-app` and `--crossover-bottle`.
+
+## Saving Launch Defaults
+
+Pass `--set-defaults` during launch to write the current CrossOver flags into the game's config section permanently:
+
+```bash
+legendary launch <App Name> \
+  --crossover-app "/Applications/CrossOver.app" \
+  --crossover-bottle MyBottle \
+  --set-defaults
+```
+
+Reset a game's saved settings back to the global defaults:
+
+```bash
+legendary launch <App Name> --reset-defaults
+```
+
+## Dry Run
+
+To generate the full launch command without running the game — useful for debugging or configuring external launchers:
+
+```bash
+legendary launch <App Name> --offline --dry-run
+```
+
+## Configuration Reference
+
+| Config key | CLI equivalent | Description |
+|---|---|---|
+| `crossover_app` | `--crossover-app <path>` | Path to the CrossOver `.app` bundle |
+| `crossover_bottle` | `--crossover-bottle <name>` | Name of the CrossOver bottle to use |
+| `disable_auto_crossover = true` | — | Disable automatic CrossOver use on macOS |
+
+<Note>
+  `pywebview` is currently unsupported on macOS. When running `legendary auth`, use the browser-based login flow instead of the embedded web view.
+</Note>
+
+<CardGroup cols={2}>
+  <Card title="CodeWeavers CrossOver" icon="apple" href="https://www.codeweavers.com">
+    Purchase CrossOver and access official documentation and support
+  </Card>
+  <Card title="CrossOver Setup Guide" icon="book" href="https://legendary.gl/crossover-setup">
+    Legendary-specific CrossOver bottle setup instructions
+  </Card>
+</CardGroup>

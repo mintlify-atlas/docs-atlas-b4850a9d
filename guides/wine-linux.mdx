@@ -1,0 +1,160 @@
+---
+title: "Run Epic Games on Linux with Wine"
+sidebarTitle: "Wine & Linux"
+description: "Configure Legendary to launch Windows-only Epic Games on Linux using Wine. Set Wine binary paths, prefixes, and per-game environment variables."
+---
+
+Most games available through the Epic Games Store are built exclusively for Windows. On Linux, Legendary bridges this gap by delegating game execution to Wine — a compatibility layer that translates Windows system calls into native Linux ones. When Legendary detects a Windows game on a non-Windows host, it automatically builds a Wine-prefixed launch command before handing off to the game executable. You can configure which Wine binary and prefix to use both globally (as defaults for all games) and on a per-game basis through `~/.config/legendary/config.ini`, or override them directly on the command line at launch time.
+
+## How Legendary Uses Wine
+
+Legendary reads `wine_executable` and `wine_prefix` from its config file and from CLI flags to construct the full launch command. If neither is set, it falls back to whatever `wine` binary is on your `PATH`. The `no_wine = true` config option (or `--no-wine` CLI flag) bypasses Wine entirely — useful when a wrapper like Proton already handles the translation layer.
+
+<Note>
+  Wine must be installed and either in your system `PATH` or specified as an absolute path. Legendary does not bundle Wine.
+</Note>
+
+## Global Wine Configuration
+
+Set a default Wine binary and prefix that applies to every game unless overridden by a game-specific section:
+
+```ini
+[default]
+wine_executable = wine
+wine_prefix = /home/user/.wine
+
+[default.env]
+WINEPREFIX = /home/user/.wine
+```
+
+Environment variables in `[default.env]` are exported before any game is launched. This is the right place for global DXVK settings, `WINE_LARGE_ADDRESS_AWARE`, or any other Wine-related variable you want applied everywhere.
+
+## Per-Game Wine Configuration
+
+Override Wine settings for a specific game by adding a section named after its app name. Per-game sections always take precedence over `[default]`:
+
+```ini
+[AppName]
+wine_executable = /usr/bin/wine64
+wine_prefix = /mnt/games/AppName/.wine
+
+[AppName.env]
+WINEPREFIX = /mnt/games/AppName/.wine
+DXVK_CONFIG_FILE = /mnt/games/AppName/dxvk.conf
+```
+
+<Tip>
+  Use `legendary list-installed` to confirm the exact app name to use as the config section header.
+</Tip>
+
+## Launching With Wine Flags
+
+Pass Wine settings directly on the command line to override both defaults and per-game config for a single session:
+
+```bash
+legendary launch <App Name> --wine /usr/bin/wine64 --wine-prefix ~/.wine-game
+```
+
+### Saving Flags as Defaults
+
+Add `--set-defaults` to persist CLI flags into the app's config section, so you don't have to retype them every time. The Wine binary and prefix will be written to `~/.config/legendary/config.ini` under the game's app name:
+
+```bash
+legendary launch <App Name> --wine /usr/bin/wine64 --wine-prefix ~/.wine-game --set-defaults
+```
+
+### Resetting Saved Defaults
+
+Remove a game's entire config section (reverting it to global defaults) with:
+
+```bash
+legendary launch <App Name> --reset-defaults
+```
+
+## Disabling Wine
+
+When using a wrapper that already includes Wine — such as a custom Proton script — you can tell Legendary not to prepend the Wine binary to the launch command:
+
+<Tabs>
+  <Tab title="CLI flag">
+    ```bash
+    legendary launch <App Name> --no-wine --wrapper /path/to/wrapper
+    ```
+  </Tab>
+  <Tab title="config.ini">
+    ```ini
+    [AppName]
+    no_wine = true
+    wrapper = /path/to/wrapper
+    ```
+  </Tab>
+</Tabs>
+
+## Using Wrapper Commands
+
+Wrappers are commands that prefix the game's launch command — useful for tools like `gamemode`, custom shell scripts, or Proton. Legendary passes the full game command as arguments to the wrapper.
+
+<Tabs>
+  <Tab title="CLI flag">
+    ```bash
+    legendary launch <App Name> --wrapper "gamemoderun wine"
+    ```
+  </Tab>
+  <Tab title="config.ini (global)">
+    ```ini
+    [default]
+    wrapper = gamemode
+    ```
+  </Tab>
+  <Tab title="config.ini (per-game)">
+    ```ini
+    [AppName]
+    wrapper = "/path/with spaces/gamemoderun"
+    ```
+
+    <Note>
+      Wrap paths that contain spaces in double quotes inside the config value, as shown above.
+    </Note>
+  </Tab>
+</Tabs>
+
+## Dry Run — Get the Launch Command
+
+Use `--dry-run` to print the complete launch command that Legendary would use without actually starting the game. This is especially useful for configuring external launchers like Lutris or Steam:
+
+```bash
+legendary launch <App Name> --offline --dry-run
+```
+
+Example output:
+
+```
+[cli] INFO: Not Launching AppName (dry run)
+[cli] INFO: Launch parameters: wine /mnt/games/AppName/GameExecutable.exe -epicapp=AppName ...
+[cli] INFO: Working directory: /mnt/games/AppName
+[cli] INFO: Environment overrides: WINEPREFIX=/mnt/games/AppName/.wine, DXVK_CONFIG_FILE=...
+```
+
+Copy the printed launch parameters directly into your external launcher's game entry.
+
+<Tip>
+  Most games run offline without issue. Passing `--offline` skips the Epic authentication step and makes the dry-run output suitable for standalone use.
+</Tip>
+
+## Configuration Reference
+
+| Config key | CLI equivalent | Description |
+|---|---|---|
+| `wine_executable` | `--wine <path>` | Path to the Wine binary |
+| `wine_prefix` | `--wine-prefix <path>` | Path to the Wine prefix directory |
+| `no_wine = true` | `--no-wine` | Skip Wine when launching |
+| `wrapper = <cmd>` | `--wrapper <cmd>` | Prefix launch with a wrapper command |
+
+<CardGroup cols={2}>
+  <Card title="WineHQ" icon="wine-glass" href="https://www.winehq.org/">
+    Official Wine project — download Wine and read compatibility reports
+  </Card>
+  <Card title="DXVK" icon="layer-group" href="https://github.com/doitsujin/dxvk">
+    Vulkan-based DirectX 9/10/11 translation layer for improved compatibility
+  </Card>
+</CardGroup>

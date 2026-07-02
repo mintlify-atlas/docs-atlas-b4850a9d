@@ -1,0 +1,155 @@
+---
+title: "legendary launch — Launch an Installed Epic Game"
+sidebarTitle: "launch"
+description: "legendary launch starts an installed Epic game with optional online authentication, WINE support, wrapper commands, language overrides, and dry-run mode."
+---
+
+`legendary launch` starts an installed Epic game, handling authentication with Epic's backend, setting up the correct environment variables, and forwarding any extra arguments directly to the game executable. It supports online and offline modes, WINE and CrossOver on Linux/macOS, arbitrary wrapper commands (such as `gamemoderun` or `mangohud`), language overrides, and a dry-run mode that prints the full launch command without executing it — handy for copying launch parameters into Lutris or Steam.
+
+## Usage
+
+```
+legendary launch <App Name> [options] [-- <game args>]
+```
+
+Any arguments that follow the known Legendary flags are passed through directly to the game process. The `<App Name>` accepts the exact app name, a partial title match, or a configured alias.
+
+## Flags
+
+### Authentication & online behavior
+
+<ResponseField name="--offline" type="flag">
+  Skip the Epic login step and launch the game without online authentication. Most single-player titles work fine in offline mode.
+</ResponseField>
+
+<ResponseField name="--skip-version-check" type="flag">
+  Skip the version check when launching in online mode. Useful if you intentionally have an older version installed and want to avoid the update prompt.
+</ResponseField>
+
+<ResponseField name="--override-username <username>" type="string">
+  Override the username presented to the game at launch. Only works with titles that accept this parameter.
+</ResponseField>
+
+### Launch control
+
+<ResponseField name="--dry-run" type="flag">
+  Print the exact command line that would be used to launch the game, then exit without running it. Ideal for extracting launch parameters to paste into other launchers such as Lutris or Steam.
+</ResponseField>
+
+<ResponseField name="--override-exe <exe path>" type="string">
+  Override the default executable to launch, specified as a path relative to the game installation directory. Useful for launching alternative executables bundled with the game.
+</ResponseField>
+
+<ResponseField name="--origin" type="flag">
+  Launch Origin/EA App to activate or run the game rather than launching it directly. Required for EA-managed titles.
+</ResponseField>
+
+<ResponseField name="--json" type="flag">
+  Print all launch information (executable path, arguments, environment variables) as JSON and exit without launching the game.
+</ResponseField>
+
+### Wrapper & environment
+
+<ResponseField name="--wrapper <wrapper command>" type="string">
+  Prefix the game's launch command with the given wrapper. For example, `--wrapper gamemoderun` or `--wrapper "mangohud"`. Separate multiple wrappers with spaces within the quoted string.
+</ResponseField>
+
+<ResponseField name="--language <two letter code>" type="string">
+  Override the language passed to the game. Accepts a standard two-letter language code (e.g. `fr`, `de`, `ja`). Defaults to the system locale.
+</ResponseField>
+
+### Persisting settings
+
+<ResponseField name="--set-defaults" type="flag">
+  Save the launch parameters used in this invocation to Legendary's config file so they are applied automatically on future launches. Note: environment variables are not saved.
+</ResponseField>
+
+<ResponseField name="--reset-defaults" type="flag">
+  Remove all saved config settings for this app and exit. The next launch will use default parameters.
+</ResponseField>
+
+### WINE (Linux / macOS)
+
+<ResponseField name="--wine <wine binary>" type="string">
+  Path to the Wine binary to use when launching Windows games on Linux or macOS (e.g. `/usr/bin/wine64`).
+</ResponseField>
+
+<ResponseField name="--wine-prefix <wine pfx path>" type="string">
+  Path to the Wine prefix directory to use (e.g. `~/.wine`).
+</ResponseField>
+
+<ResponseField name="--no-wine" type="flag">
+  Do not use Wine even if it is configured. Use this when running the game through a wrapper that manages Wine internally.
+</ResponseField>
+
+### CrossOver (macOS)
+
+<ResponseField name="--crossover" type="flag">
+  Interactively configure CrossOver for this application, prompting you to select the CrossOver app and bottle to use.
+</ResponseField>
+
+<ResponseField name="--crossover-app <path to .app>" type="string">
+  Specify the CrossOver `.app` to use (e.g. `"/Applications/CrossOver.app"`).
+</ResponseField>
+
+<ResponseField name="--crossover-bottle <bottle name>" type="string">
+  Specify which CrossOver bottle to run the game in.
+</ResponseField>
+
+## Examples
+
+```bash
+# Launch a game with online authentication
+legendary launch Anemone
+
+# Launch a game in offline mode
+legendary launch Anemone --offline
+
+# Print the launch command without running it (for Lutris, Steam, etc.)
+legendary launch Anemone --offline --dry-run
+
+# Print full launch information as JSON
+legendary launch Anemone --json
+
+# Launch with a specific Wine binary and prefix
+legendary launch Anemone --wine /usr/bin/wine64 --wine-prefix ~/.wine
+
+# Launch with gamemode for better performance
+legendary launch Anemone --wrapper gamemoderun
+
+# Launch with multiple wrappers
+legendary launch Anemone --wrapper "gamemoderun mangohud"
+
+# Save Wine settings as defaults for future launches
+legendary launch Anemone --wine /usr/bin/wine64 --wine-prefix ~/.wine --set-defaults
+
+# Override the game language to French
+legendary launch Anemone --language fr
+
+# Launch in online mode but skip the version check
+legendary launch Anemone --skip-version-check
+
+# Use CrossOver on macOS with a specific bottle
+legendary launch Anemone --crossover-app "/Applications/CrossOver.app" --crossover-bottle MyBottle
+
+# Reset all saved launch defaults for a game
+legendary launch Anemone --reset-defaults
+```
+
+## Notes
+
+<Tip>
+  Most single-player games work perfectly in `--offline` mode. Running `legendary launch <App Name> --offline --dry-run` gives you a ready-to-paste command line you can add directly to Lutris, Steam (as a non-Steam game), or any other launcher.
+</Tip>
+
+<Note>
+  Any flags not recognized by Legendary are passed through to the game process. To avoid ambiguity, place game-specific arguments after all Legendary flags.
+</Note>
+
+<Tip>
+  Use `--set-defaults` to permanently save your preferred Wine binary, prefix, wrapper, or language settings. After saving, you can launch the game with just `legendary launch <App Name>`.
+</Tip>
+
+<Note>
+  The `--crossover` flag is only useful on macOS with CodeWeavers CrossOver installed. On Linux, use `--wine` and `--wine-prefix` to configure Wine directly.
+</Note>

@@ -1,0 +1,220 @@
+---
+title: "legendary install — Download and Install Epic Games"
+sidebarTitle: "install"
+description: "legendary install downloads and installs an Epic game. Aliases: download, update. Supports DLC, delta patching, repair, custom paths, and selective downloads."
+---
+
+`legendary install` is the primary command for downloading and installing games from your Epic Games account. It handles everything from a fresh install to incremental updates using delta patching, DLC management, selective downloading, and repair of corrupted files. The command is also available as `legendary download` and `legendary update` — all three aliases share the same flags and behavior.
+
+## Usage
+
+```
+legendary install <App Name> [options]
+```
+
+**Aliases:** `download`, `update`
+
+The `<App Name>` argument accepts the exact app name (e.g. `Anemone`), a partial title match, or an abbreviation. For multi-word names, use quotes (e.g. `"world of goo"`).
+
+## Flags
+
+### Installation paths
+
+<ResponseField name="--base-path <path>" type="string">
+  Root directory under which game folders are created. Defaults to `~/Games`. All games without an explicit `--game-folder` will be installed as subdirectories here.
+</ResponseField>
+
+<ResponseField name="--game-folder <path>" type="string">
+  Override the specific folder name (or full path) for this game's installation. Defaults to the folder name specified in the game's metadata.
+</ResponseField>
+
+### Download behavior
+
+<ResponseField name="--max-shared-memory <size>" type="integer">
+  Maximum amount of shared memory to allocate for the download manager, in MiB. Default is 1 GiB (1024 MiB). Increase this on systems with ample RAM to speed up large installs.
+</ResponseField>
+
+<ResponseField name="--max-workers <num>" type="integer">
+  Maximum number of parallel download worker processes. Defaults to `min(2 × CPU count, 16)`. Reduce this if the download saturates your network or CPU.
+</ResponseField>
+
+<ResponseField name="--force" type="flag">
+  Download and overwrite all files, ignoring any that already exist on disk. Useful for forcing a clean reinstall.
+</ResponseField>
+
+<ResponseField name="--disable-patching" type="flag">
+  Do not attempt to patch existing files; download entire changed files instead. This increases the download size but avoids potential issues with delta patching.
+</ResponseField>
+
+<ResponseField name="--download-only / --no-install" type="flag">
+  Download all files but do not install the game and do not run any prerequisite installers. Useful for staging downloads ahead of time.
+</ResponseField>
+
+<ResponseField name="--update-only" type="flag">
+  Only perform an update; do nothing if the specified app is not already installed.
+</ResponseField>
+
+<ResponseField name="--dl-timeout <sec>" type="integer">
+  Per-connection timeout for the downloader, in seconds. Default is 10 seconds.
+</ResponseField>
+
+<ResponseField name="--ignore-free-space" type="flag">
+  Do not abort the installation if there is insufficient free disk space. Use with caution.
+</ResponseField>
+
+<ResponseField name="--disable-delta-manifests" type="flag">
+  Do not use delta manifests when updating. This may significantly increase the download size for updates, but can be used to work around delta-related issues.
+</ResponseField>
+
+<ResponseField name="--preferred-cdn <hostname>" type="string">
+  Set the hostname of the preferred CDN to use when available (e.g. `epicgames-download1.akamaized.net`). Useful for improving download speeds from a specific region.
+</ResponseField>
+
+<ResponseField name="--no-https" type="flag">
+  Download game files over plaintext HTTP instead of HTTPS. Intended for use with a local LAN cache server.
+</ResponseField>
+
+<ResponseField name="--dlm-debug" type="flag">
+  Set the download manager and all worker processes to debug log level. Produces very verbose output — useful when diagnosing download failures.
+</ResponseField>
+
+### Advanced manifest / CDN options
+
+<ResponseField name="--manifest <uri>" type="string">
+  Manifest URL or local file path to use instead of fetching from Epic's CDN. Useful for installing a specific game version (e.g. downgrading).
+</ResponseField>
+
+<ResponseField name="--old-manifest <uri>" type="string">
+  Manifest to treat as the "old" version for delta patch testing.
+</ResponseField>
+
+<ResponseField name="--delta-manifest <uri>" type="string">
+  Delta manifest URL or path to use for testing.
+</ResponseField>
+
+<ResponseField name="--base-url <url>" type="string">
+  Override the base URL that files are downloaded from. Useful for testing or switching to an alternative CDN.
+</ResponseField>
+
+### Platform
+
+<ResponseField name="--platform <Platform>" type="string">
+  Platform to install the game for. Defaults to the already-installed platform if updating, otherwise **Windows**.
+</ResponseField>
+
+### Selective downloading (SDL)
+
+<ResponseField name="--prefix <prefix>" type="string">
+  Only download files whose path starts with the given prefix (case-insensitive). Useful for fetching a specific language pack or game component.
+</ResponseField>
+
+<ResponseField name="--exclude <prefix>" type="string">
+  Exclude files whose path starts with the given prefix (case-insensitive).
+</ResponseField>
+
+<ResponseField name="--install-tag <tag>" type="string">
+  Only download files that carry the specified install tag. Tags are defined in the game's manifest.
+</ResponseField>
+
+<ResponseField name="--enable-reordering" type="flag">
+  Enable a chunk reordering optimization that reduces peak RAM usage during downloads. May produce adverse results for some titles — use only if RAM is a constraint.
+</ResponseField>
+
+<ResponseField name="--reset-sdl" type="flag">
+  Reset all selective downloading (SDL) choices for this title. After resetting, Legendary will prompt you again on the next install/update. A repair run is required to actually download newly selected components.
+</ResponseField>
+
+<ResponseField name="--skip-sdl" type="flag">
+  Skip the SDL prompt entirely and continue with default components only (required game data). No optional language packs or add-ons will be selected.
+</ResponseField>
+
+<ResponseField name="--disable-sdl" type="flag">
+  Disable selective downloading for this title and reset any existing SDL configuration, causing all files to be downloaded.
+</ResponseField>
+
+### DLC
+
+<ResponseField name="--with-dlcs" type="flag">
+  Automatically install all DLCs alongside the base game without prompting.
+</ResponseField>
+
+<ResponseField name="--skip-dlcs" type="flag">
+  Do not ask about installing DLCs; install the base game only.
+</ResponseField>
+
+### Save game path
+
+<ResponseField name="--save-path <path>" type="string">
+  Set the save game path to be used by `legendary sync-saves` for this title.
+</ResponseField>
+
+### Repair
+
+<ResponseField name="--repair" type="flag">
+  Repair an installed game by verifying all files and redownloading any that are corrupted or missing.
+</ResponseField>
+
+<ResponseField name="--repair-and-update" type="flag">
+  Update the game to the latest version while repairing. Combines an update check with the repair process.
+</ResponseField>
+
+## Examples
+
+```bash
+# Install a game by app name
+legendary install Anemone
+
+# Install using a partial title or abbreviation
+legendary install "world of goo"
+legendary install wog
+
+# Install to a custom base directory
+legendary install Anemone --base-path /mnt/games
+
+# Install with all DLCs, no prompts
+legendary install Anemone --with-dlcs
+
+# Update an already-installed game (three equivalent commands)
+legendary update Anemone
+legendary download Anemone
+legendary install Anemone
+
+# Only update if already installed; do nothing otherwise
+legendary install Anemone --update-only
+
+# Repair a corrupted install
+legendary install Anemone --repair
+
+# Update to the latest version while repairing
+legendary install Anemone --repair-and-update
+
+# Download files without installing (stage for later)
+legendary install Anemone --download-only
+
+# Install for macOS platform
+legendary install Anemone --platform Mac
+
+# Install with increased worker count and shared memory
+legendary install Anemone --max-workers 8 --max-shared-memory 2048
+
+# Use a LAN cache (HTTP, no HTTPS)
+legendary install Anemone --no-https --preferred-cdn 192.168.1.10
+```
+
+## Notes
+
+<Note>
+  The app name passed to `legendary install` is the one shown by `legendary list`, not necessarily the display title. However, since version 0.20.12, partial title matches and abbreviations are also accepted.
+</Note>
+
+<Tip>
+  To see all available app names and their titles, run `legendary list` first.
+</Tip>
+
+<Warning>
+  Using `--force` will re-download and overwrite every file regardless of its local state. This is rarely needed — use `--repair` instead if you suspect file corruption.
+</Warning>
+
+<Tip>
+  Default values for `max_memory`, `max_workers`, `install_dir`, and `preferred_cdn` can be set permanently in `~/.config/legendary/config.ini`, so you don't need to pass them on every invocation.
+</Tip>

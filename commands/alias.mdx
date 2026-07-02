@@ -1,0 +1,78 @@
+---
+title: "legendary alias — Manage Game Aliases"
+sidebarTitle: "alias"
+description: "legendary alias adds, renames, removes, and lists short aliases for Epic Games app names, making it easier to use Legendary commands."
+---
+
+`legendary alias` lets you create short, memorable names for the often-cryptic App Names that Epic assigns to games (for example, `9d2d0eb64d5c44529cece33fe2a46482` for Grand Theft Auto V). Once an alias is registered, you can use it in place of the App Name in any Legendary command. Legendary also generates automatic aliases from game titles (e.g. `wog` for *World of Goo*) unless you have disabled that behaviour in your config — the `alias` command manages your custom additions on top of those.
+
+## Usage
+
+```
+legendary alias [-h] <add|rename|remove|list> [<App name/Old alias>] [<New alias>]
+```
+
+## Actions
+
+| Action | Positional arguments | Description |
+|---|---|---|
+| `add` | `<App name>` `<alias>` | Create a new alias pointing to the given App Name |
+| `rename` | `<old alias>` `<new alias>` | Rename an existing alias |
+| `remove` | `<alias>` | Delete an alias |
+| `list` | `[<App name>]` | List all aliases, or only the aliases for a specific App Name |
+
+## Examples
+
+List all current aliases:
+
+```bash
+legendary alias list
+```
+
+Add a custom alias for a game:
+
+```bash
+legendary alias add "World of Goo" wog
+```
+
+Rename an existing alias:
+
+```bash
+legendary alias rename wog worldofgoo
+```
+
+Remove an alias:
+
+```bash
+legendary alias remove worldofgoo
+```
+
+List all aliases registered for a specific game:
+
+```bash
+legendary alias list "World of Goo"
+```
+
+## Using Aliases in Other Commands
+
+Once created, an alias can be used wherever an App Name is accepted:
+
+```bash
+legendary launch wog
+legendary sync-saves wog
+legendary install wog
+```
+
+<Tip>
+  Legendary stores aliases in `~/.config/legendary/config.ini` under the `[Legendary.aliases]` section. You can also add aliases there directly:
+
+  ```ini
+  [Legendary.aliases]
+  wog = WorldOfGooGameAppName
+  gtav = 9d2d0eb64d5c44529cece33fe2a46482
+  ```
+</Tip>
+
+<Note>
+  Automatically generated aliases (derived from game titles) are read-only and cannot be edited with the `alias` command. To prevent Legendary from generating them, set `disable_auto_aliasing = true` in the `[Legendary]` section of your config file.
+</Note>

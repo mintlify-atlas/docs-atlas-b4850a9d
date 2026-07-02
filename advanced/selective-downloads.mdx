@@ -1,0 +1,101 @@
+---
+title: "Selective Downloads: Install Game Components with Legendary"
+sidebarTitle: "Selective Downloads"
+description: "Download only specific parts of a game — language packs, DLC, high-res textures, and more — using Legendary's selective download feature."
+---
+
+Some games on the Epic Games Store ship optional install components — things like language voice packs, high-resolution texture packs, or game-mode expansions — that not every player needs. Legendary supports Selective Download (SDL), which lets you choose which of these tagged file groups to install, saving disk space and download time. When SDL data is available for a game, Legendary will prompt you to choose your components interactively during installation. You can also skip, reset, or permanently disable SDL per-game through CLI flags or your `config.ini`.
+
+## How SDL Works
+
+Games that support SDL have their files grouped into **install tags** — named sets of files associated with a particular component. Legendary knows about these tag groupings for supported titles (such as Fortnite and Cyberpunk 2077) and can present them as a menu during installation.
+
+When you run `legendary install <App>` for a supported title, Legendary checks for SDL data. If data is found and the game hasn't been installed before (or you've reset the SDL choices), an interactive prompt appears listing each available component and asking which ones you want.
+
+<Note>
+SDL is only shown for games that have SDL definitions available. DLC installs are never subject to SDL prompting. If no SDL data is found for a game, all files are downloaded as normal.
+</Note>
+
+## SDL Flags During Install
+
+Use these flags to control SDL behavior at install time:
+
+<CodeGroup>
+```bash Skip the SDL prompt (use required components only)
+legendary install <App> --skip-sdl
+```
+
+```bash Reset previous SDL choices (re-prompt on next install/update)
+legendary install <App> --reset-sdl
+```
+
+```bash Disable SDL entirely for this title (download everything)
+legendary install <App> --disable-sdl
+```
+</CodeGroup>
+
+- `--skip-sdl` silently selects only the `__required` tags defined for the game, downloading the minimum necessary components without prompting.
+- `--reset-sdl` clears your saved tag selection. The prompt will appear again on the next run. Any newly selected components will only be downloaded after a subsequent repair run.
+- `--disable-sdl` disables SDL for this title and downloads all tagged and untagged files.
+
+<Warning>
+After using `--reset-sdl`, Legendary saves your new tag choices but does **not** automatically re-download newly selected components. You must follow up with a repair run to actually fetch them:
+
+```bash
+legendary install <App> --repair
+```
+</Warning>
+
+## File-Level Filtering
+
+For more granular control, Legendary provides path-prefix filters and direct tag selection that work independently of SDL. These can be combined.
+
+```bash
+# Only download files whose path starts with a given prefix
+legendary install <App> --prefix "Engine/Content"
+
+# Exclude files whose path starts with a given prefix
+legendary install <App> --exclude "optional/highres"
+
+# Download only files that carry a specific install tag
+legendary install <App> --install-tag voice_de_de
+```
+
+<Note>
+`--prefix` and `--exclude` both accept multiple values — repeat the flag for each prefix you want to add. Files must match at least one `--prefix` to be included, and are dropped if they match any `--exclude`.
+</Note>
+
+## Listing Files in a Manifest
+
+Before installing, you can inspect the full file list for a game to understand what install tags are present and which files they cover. This is especially useful for crafting precise `--prefix` or `--install-tag` filters.
+
+```bash
+# List all files in a game's manifest
+legendary list-files <App Name>
+
+# List only files with a specific install tag
+legendary list-files <App Name> --install-tag voice_de_de
+
+# Output in JSON format
+legendary list-files <App Name> --json
+
+# Output a hash list (path + SHA1, useful for verification scripts)
+legendary list-files <App Name> --hashlist
+```
+
+The `list-files` command fetches the manifest from Epic's servers if the game isn't installed locally (or if you pass `--force-download`). The output includes filenames, sizes, and their associated install tags, giving you a clear picture of what you're about to download.
+
+## Permanent SDL Disable via Config
+
+If you always want to download all files for a specific game without being prompted, set `disable_sdl = true` in that game's section of your `config.ini` (`~/.config/legendary/config.ini` on Linux/macOS, `%APPDATA%\legendary\config.ini` on Windows):
+
+```ini
+[AppName]
+disable_sdl = true
+```
+
+This is equivalent to always passing `--disable-sdl` and persists across all future installs and updates for that game.
+
+<Tip>
+Run `legendary list-files <App Name>` before installing a large game to survey available install tags. This lets you build a targeted `--install-tag` or `--exclude` filter before committing to the download.
+</Tip>

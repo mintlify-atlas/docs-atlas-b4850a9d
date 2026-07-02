@@ -1,0 +1,98 @@
+---
+title: "Authenticate Legendary with Epic Games"
+sidebarTitle: "Authentication"
+description: "Log in to your Epic Games account using a browser webview, authorization code, exchange token, or by importing credentials from the Epic Games Launcher."
+---
+
+Legendary authenticates against Epic's OAuth2 API and stores the resulting credentials locally in `~/.config/legendary/`. Every time Legendary runs a command that requires a valid session, it checks the stored credentials and prompts you to re-authenticate if they have expired. The simplest way to log in is to run `legendary auth` — the exact experience depends on which optional packages are installed.
+
+## Login Methods
+
+<Tabs>
+  <Tab title="WebView (Recommended)">
+    If you have the optional `pywebview` package installed, `legendary auth` opens an embedded browser window pointed at the Epic Games login page. Once you complete the login flow in that window, Legendary captures the exchange token automatically — no copying or pasting required.
+
+    ```bash
+    legendary auth
+    ```
+
+    <Note>
+      WebView support on Windows requires the `edgechromium` or `cef` renderer. The `pywebview` Qt engine may not work correctly, and WebView is currently unsupported on macOS. Install the webview extra with `pip install legendary-gl[webview]`. On Ubuntu you may also need `python3-gi-cairo`.
+    </Note>
+
+    To force the manual flow even when `pywebview` is available, pass `--disable-webview`:
+
+    ```bash
+    legendary auth --disable-webview
+    ```
+  </Tab>
+
+  <Tab title="Authorization Code (Manual)">
+    When `pywebview` is not installed, or when you pass `--disable-webview`, Legendary prints a URL and prompts you to paste a code.
+
+    1. Open `https://legendary.gl/epiclogin` in your browser and log in.
+    2. Copy the value of `authorizationCode` from the JSON response.
+    3. Paste it into the terminal prompt.
+
+    Alternatively, supply the code directly on the command line:
+
+    ```bash
+    legendary auth --code <authorization code>
+    ```
+
+    Legendary also accepts the entire JSON blob — it will extract `authorizationCode` automatically if you paste the full object.
+  </Tab>
+
+  <Tab title="Exchange Token / Session ID">
+    If you already have an Epic exchange token or a session ID, you can pass either directly:
+
+    ```bash
+    # Exchange token
+    legendary auth --token <exchange token>
+
+    # Session ID
+    legendary auth --sid <session id>
+    ```
+
+    These methods are intended for scripted or automated environments where an interactive browser flow is not practical.
+  </Tab>
+
+  <Tab title="Import from EGL">
+    If the Epic Games Launcher is already installed and you are signed in, Legendary can import the existing session so you do not need to log in again:
+
+    ```bash
+    legendary auth --import
+    ```
+
+    <Warning>
+      Importing the EGL session will sign you out of the Epic Games Launcher on that machine. The two applications cannot share the same session simultaneously.
+    </Warning>
+
+    **On Windows**, Legendary reads the EGL configuration automatically from its default `%LOCALAPPDATA%` path.
+
+    **On Linux**, a WINE prefix path is required. Legendary checks `~/Games/epic-games-store` automatically for a Lutris installation. If it cannot find a prefix, it will prompt you to enter the path manually:
+
+    ```bash
+    legendary auth --import
+    # Legendary prompts: "Path [empty input to quit]:"
+    ```
+  </Tab>
+</Tabs>
+
+## Logging Out
+
+To delete all stored credentials and session data:
+
+```bash
+legendary auth --delete
+```
+
+After running this command, any subsequent operation that requires authentication will prompt you to log in again.
+
+## Stored Credentials
+
+Legendary stores your OAuth tokens in `~/.config/legendary/`. On Linux and macOS the directory is created with user-only permissions. You can override the config directory location by setting the `LEGENDARY_CONFIG_PATH` environment variable, or by setting `XDG_CONFIG_HOME` (Linux).
+
+<Note>
+  Credentials are validated on each run. If a stored token has expired, Legendary will notify you and you will need to run `legendary auth` again to obtain a fresh session.
+</Note>

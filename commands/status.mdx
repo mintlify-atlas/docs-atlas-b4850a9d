@@ -1,0 +1,82 @@
+---
+title: "legendary status — Show Legendary Account Status"
+sidebarTitle: "status"
+description: "legendary status displays the current login state, account info, installed game count, and update availability. Supports offline and JSON output modes."
+---
+
+`legendary status` gives you a quick at-a-glance summary of your Legendary installation: who you are logged in as, how many games are on your account, how many are currently installed, whether EGL sync is active, where Legendary's config directory lives, and whether a newer version of Legendary is available. By default it performs a live login check and fetches an up-to-date game list from the Epic API. If you are offline or want to skip network calls entirely, use `--offline` to print only what is available locally.
+
+## Usage
+
+```
+legendary status [-h] [--offline] [--json]
+```
+
+## Flags
+
+<ParamField body="--offline" type="flag">
+  Skip the Epic API login and only display information that is available from
+  locally stored data. No network requests are made. Useful when you are
+  offline, working in an air-gapped environment, or simply want a fast check
+  of your local installation state.
+</ParamField>
+
+<ParamField body="--json" type="flag">
+  Output the status report as a JSON object instead of the default
+  human-readable text. The JSON object contains the following keys:
+
+  | Key | Type | Description |
+  |-----|------|-------------|
+  | `account` | string | Epic account display name, or `<not logged in>` |
+  | `games_available` | integer | Number of games available on the account |
+  | `games_installed` | integer | Number of games currently installed locally |
+  | `egl_sync_enabled` | boolean | Whether EGL ↔ Legendary sync is active |
+  | `config_directory` | string | Path to Legendary's configuration directory |
+</ParamField>
+
+## Output
+
+When run without `--json`, `legendary status` prints a text report in the following format:
+
+```
+Epic account: YourDisplayName
+Games available: 42
+Games installed: 7
+EGL Sync enabled: False
+Config directory: /home/user/.config/legendary
+Platform (System): Linux-6.x.x (...) (posix)
+
+Legendary version: 0.X.X - "Codename"
+Update available: no
+```
+
+If a Legendary update is available, the output additionally shows the new version number, release name, a short summary of changes, the release URL, and a critical-update notice if the release resolves major issues.
+
+## Examples
+
+```bash
+# Show full status — performs an API login and fetches latest game list
+legendary status
+
+# Show offline status only — no network calls made
+legendary status --offline
+
+# Output status as a JSON object
+legendary status --json
+
+# Pretty-print the JSON output
+legendary -J status --json
+```
+
+<Note>
+  If you are not logged in, `legendary status` will show `<not logged in>` as
+  the account name and automatically behave as if `--offline` was passed, since
+  no authenticated API calls can be made.
+</Note>
+
+<Tip>
+  Use `legendary status --json` in scripts or monitoring tools to programmatically
+  check login state and installed game counts without parsing human-readable text.
+  Combine with the global `-J` flag (`legendary -J status --json`) for
+  pretty-printed JSON that is easier to inspect interactively.
+</Tip>

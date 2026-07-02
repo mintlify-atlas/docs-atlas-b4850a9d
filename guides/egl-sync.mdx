@@ -1,0 +1,141 @@
+---
+title: "Sync Games Between Legendary and Epic Games Launcher"
+sidebarTitle: "EGL Sync"
+description: "Import, export, and automatically sync game installations between Legendary and the Epic Games Launcher on the same machine."
+---
+
+EGL Sync lets Legendary and the Epic Games Launcher share the same game installation on disk — no re-downloading required. Games installed by EGL can be imported into Legendary, and games installed by Legendary can be exported so EGL recognises them. With automatic sync enabled, any install, update, or removal performed in either client is reflected in the other without any manual intervention.
+
+<Warning>
+  EGL Sync is **not supported** for the macOS version of the Epic Games Launcher. On Linux, EGL runs under WINE, so a WINE prefix path is required.
+</Warning>
+
+## Quick Setup
+
+Running `egl-sync` without arguments starts an interactive setup that detects existing installations and asks whether to import or export games, then offers to enable ongoing automatic sync:
+
+```bash
+legendary egl-sync
+```
+
+For non-interactive environments, pass `-y` to accept all prompts automatically:
+
+```bash
+legendary -y egl-sync
+```
+
+## Specifying the EGL Path
+
+Legendary needs to know where EGL stores its manifest files. On Windows this path is detected automatically. On Linux you must provide either the WINE prefix directory or the direct manifest path.
+
+<Tabs>
+  <Tab title="Windows (manual path)">
+    If auto-detection fails on Windows, supply the manifest directory directly:
+
+    ```bash
+    legendary egl-sync --egl-manifest-path "C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests"
+    ```
+  </Tab>
+
+  <Tab title="Linux (WINE prefix)">
+    Provide the root of the WINE prefix that contains the EGL installation. Legendary automatically searches for the Lutris default at `~/Games/epic-games-store`:
+
+    ```bash
+    legendary egl-sync --egl-wine-prefix ~/Games/epic-games-store
+    ```
+
+    Legendary builds the full manifests path from the prefix by appending `drive_c/ProgramData/Epic/EpicGamesLauncher/Data/Manifests` internally.
+  </Tab>
+
+  <Tab title="Direct manifest path">
+    To point directly to the manifests directory regardless of platform:
+
+    ```bash
+    legendary egl-sync --egl-manifest-path /path/to/Manifests
+    ```
+  </Tab>
+</Tabs>
+
+## Enabling and Disabling Automatic Sync
+
+Once the EGL path is configured, automatic sync keeps both clients in sync whenever Legendary installs, updates, or removes a game.
+
+**Enable automatic sync:**
+
+```bash
+legendary egl-sync --enable-sync
+```
+
+**Disable automatic sync** (EGL path configuration is retained, syncing just stops running automatically):
+
+```bash
+legendary egl-sync --disable-sync
+```
+
+When automatic sync is active, Legendary sets `egl_sync = true` and `egl_programdata = <path>` in the `[Legendary]` section of `~/.config/legendary/config.ini`. You can also set these values directly in the config file:
+
+```ini
+[Legendary]
+egl_sync = true
+egl_programdata = /path/to/Manifests
+```
+
+## Selective Sync Operations
+
+<Tabs>
+  <Tab title="Import only (EGL → Legendary)">
+    Bring EGL-installed games into Legendary without touching EGL:
+
+    ```bash
+    legendary egl-sync --import-only
+    ```
+  </Tab>
+
+  <Tab title="Export only (Legendary → EGL)">
+    Register Legendary-installed games with EGL without importing anything:
+
+    ```bash
+    legendary egl-sync --export-only
+    ```
+  </Tab>
+
+  <Tab title="One-shot sync">
+    Perform a single bidirectional sync without configuring or modifying automatic sync settings:
+
+    ```bash
+    legendary egl-sync --one-shot
+    ```
+  </Tab>
+
+  <Tab title="Migrate">
+    Import all EGL games into Legendary and then remove them from EGL, transferring full ownership to Legendary. Automatic sync is disabled and the EGL link is removed after migration:
+
+    ```bash
+    legendary egl-sync --migrate
+    ```
+
+    <Note>
+      Migration implies `--import-only`, `--one-shot`, and `--unlink`. The game files themselves are not moved or deleted — only the EGL manifest entries are removed.
+    </Note>
+  </Tab>
+</Tabs>
+
+## Unlinking EGL
+
+To completely remove the EGL sync configuration and strip the EGL identifiers from all Legendary game records:
+
+```bash
+legendary egl-sync --unlink
+```
+
+<Note>
+  After unlinking, all games remain installed and usable in both Legendary and EGL, but future installs, updates, and removals in one client will no longer be reflected in the other. Attempting to update a previously synced game via EGL after unlinking may cause issues — it is recommended to manage each game exclusively in one client going forward.
+</Note>
+
+## How Automatic Sync Works
+
+When `egl_sync = true` is set in config, Legendary runs a sync pass at the start of any install, update, or removal operation. It compares the list of EGL manifest files against Legendary's install records:
+
+- **EGL → Legendary:** Any game present in EGL manifests but absent from Legendary's records is imported automatically.
+- **EGL update detected:** If a game's version or install tags differ between the two records, Legendary re-imports the EGL manifest to pick up the change.
+- **Removed from EGL:** If a synced game's manifest disappears from EGL, Legendary either restores the EGL entry or marks the game as uninstalled, depending on whether the files are still present.

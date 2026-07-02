@@ -1,23 +1,11 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
-  "name": "Legendary",
+  "projectType": "cli-tool",
+  "projectName": "Legendary",
+  "projectDescription": "A free and open-source command-line replacement for the Epic Games Launcher that lets you download, install, launch, and manage Epic Games on Linux, macOS, and Windows.",
   "theme": "aspen",
-  "colors": {
-    "primary": "#C0392B",
-    "light": "#E74C3C",
-    "dark": "#922B21"
-  },
-  "navbar": {
-    "primary": {
-      "type": "github",
-      "href": "https://github.com/legendary-gl/legendary"
-    }
-  },
-  "footer": {
-    "socials": {
-      "github": "https://github.com/legendary-gl/legendary"
-    }
-  },
+  "primaryColor": "#C0392B",
+  "lightColor": "#E74C3C",
+  "darkColor": "#922B21",
   "navigation": {
     "tabs": [
       {
@@ -112,5 +100,42 @@
         ]
       }
     ]
-  }
+  },
+  "keyFeatures": [
+    "Authenticate with Epic Games Store (webview, authorization code, or EGL import)",
+    "Download and install Epic Games with delta patching and selective downloading",
+    "Launch games with online/offline authentication including DRM support",
+    "Sync cloud saves bidirectionally with the Epic cloud",
+    "Import/export games from/to the Epic Games Launcher",
+    "Run Windows games on Linux and macOS via Wine or CrossOver",
+    "Manage EOS Overlay installation and updates",
+    "Flexible per-game and global configuration via INI config file",
+    "Manage game aliases for easier CLI use",
+    "Activate titles on third-party launchers (Ubisoft Connect, EA/Origin)"
+  ],
+  "publicApiSurface": [
+    "legendary auth",
+    "legendary list",
+    "legendary install",
+    "legendary launch",
+    "legendary uninstall",
+    "legendary verify",
+    "legendary move",
+    "legendary import",
+    "legendary info",
+    "legendary list-installed",
+    "legendary list-files",
+    "legendary sync-saves",
+    "legendary list-saves",
+    "legendary download-saves",
+    "legendary clean-saves",
+    "legendary egl-sync",
+    "legendary eos-overlay",
+    "legendary alias",
+    "legendary activate",
+    "legendary cleanup",
+    "legendary status",
+    "legendary crossover",
+    "LegendaryCore (Python API class)"
+  ]
 }

@@ -1,0 +1,46 @@
+---
+title: "legendary download-saves — Download All Cloud Save Files"
+sidebarTitle: "download-saves"
+description: "legendary download-saves downloads all cloud save files from Epic without syncing. Useful for backup or manual save management."
+---
+
+`legendary download-saves` pulls every cloud save file from Epic's servers to your local machine without performing any bidirectional sync logic. Unlike `sync-saves`, it does not compare timestamps or ask you to confirm save paths — it simply downloads whatever is stored in the cloud into Legendary's default install directory. This makes it ideal for taking a full backup of all your cloud saves or for manually inspecting the raw save files.
+
+## Usage
+
+```
+legendary download-saves [-h] [<App Name>]
+```
+
+## Positional Arguments
+
+| Argument | Description |
+|---|---|
+| `<App Name>` | App name of the game to download saves for (optional — if omitted, saves for all games are downloaded) |
+
+## Examples
+
+Download cloud saves for every game:
+
+```bash
+legendary download-saves
+```
+
+Download cloud saves for a specific game:
+
+```bash
+legendary download-saves Anemone
+```
+
+<Warning>
+  `download-saves` downloads saves directly into Legendary's default install directory rather than a game's configured save path. It does **not** merge files or resolve conflicts. If you want saves written to the correct save location and have conflicts handled automatically, use [`sync-saves`](/commands/sync-saves) instead.
+</Warning>
+
+## Relationship to `sync-saves`
+
+| Command | Compares timestamps | Respects configured save path | Handles conflicts |
+|---|---|---|---|
+| `download-saves` | No | No | No |
+| `sync-saves` | Yes | Yes | Yes (prompts or uses `--force-*`) |
+
+Use `download-saves` when you need a raw backup or want to inspect save files outside of normal sync flow. Use `sync-saves` for day-to-day cloud save management.

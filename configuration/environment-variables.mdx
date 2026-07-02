@@ -1,0 +1,114 @@
+---
+title: "Legendary Environment Variables"
+sidebarTitle: "Environment Variables"
+description: "Override Legendary's config path, log level, and behavior using environment variables. Use LEGENDARY_CONFIG_PATH to switch between profiles."
+---
+
+Legendary respects a small set of shell environment variables that control where it looks for configuration and data files. These variables are evaluated every time Legendary starts, before any config file is read, making them useful for switching between multiple accounts or setups without touching any files. In addition, per-game `[AppName.env]` sections in `config.ini` let you inject arbitrary environment variables into a game's launch environment — this is how you configure Wine, DXVK, and other runtime settings on Linux and macOS.
+
+---
+
+## Legendary Environment Variables
+
+### `LEGENDARY_CONFIG_PATH`
+
+Overrides the **entire configuration directory** Legendary uses. When set, Legendary will read its `config.ini`, `installed.json`, game metadata, and manifests from this directory instead of the default location.
+
+```bash
+export LEGENDARY_CONFIG_PATH=/home/user/.config/legendary-alt
+legendary auth
+```
+
+This is the primary way to maintain **multiple isolated configurations** — for example, separate accounts, separate install directories, or a testing setup alongside your main one.
+
+<Tip>
+  You can define a shell alias for each profile to switch cleanly between them:
+
+  ```bash
+  alias legendary-work='LEGENDARY_CONFIG_PATH=~/.config/legendary-work legendary'
+  alias legendary-home='LEGENDARY_CONFIG_PATH=~/.config/legendary-home legendary'
+  ```
+</Tip>
+
+---
+
+### `XDG_CONFIG_HOME`
+
+If `LEGENDARY_CONFIG_PATH` is not set, Legendary respects the standard [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html). When `XDG_CONFIG_HOME` is set, Legendary places its configuration in a `legendary/` subdirectory inside it:
+
+```text
+$XDG_CONFIG_HOME/legendary/config.ini
+```
+
+If neither `LEGENDARY_CONFIG_PATH` nor `XDG_CONFIG_HOME` is set, Legendary falls back to the hard-coded default:
+
+```text
+~/.config/legendary/config.ini
+```
+
+---
+
+## Config Path Resolution Order
+
+The config directory is resolved using this priority chain (first match wins):
+
+| Priority | Source | Resolved Path |
+|---|---|---|
+| 1 | `LEGENDARY_CONFIG_PATH` env var | `$LEGENDARY_CONFIG_PATH/` |
+| 2 | `XDG_CONFIG_HOME` env var | `$XDG_CONFIG_HOME/legendary/` |
+| 3 | Hard-coded default | `~/.config/legendary/` |
+
+<Note>
+  Setting `LEGENDARY_CONFIG_PATH` to a directory that does not yet exist is fine — Legendary will create the necessary subdirectories (`manifests/`, `metadata/`, `tmp/`) on first run.
+</Note>
+
+---
+
+## Per-Game Environment Variables (in config.ini)
+
+For game-specific environment variables — things like Wine prefixes, DXVK configuration, or any other runtime setting — Legendary uses dedicated `[AppName.env]` sections inside `config.ini`. Variables placed here are set in the process environment immediately before the game executable (or Wine) is launched.
+
+```ini
+[AppName.env]
+WINEPREFIX = /mnt/tank/games/Game/.wine
+DXVK_CONFIG_FILE = /mnt/tank/games/Game/dxvk.conf
+WINEDEBUG = -all
+```
+
+A `[default.env]` section sets variables for **all** games and is overridden key-by-key by any matching `[AppName.env]` entry:
+
+```ini
+[default.env]
+WINEPREFIX = /home/user/legendary/.wine
+```
+
+<Note>
+  Variables defined in `[AppName.env]` override the same key in `[default.env]`. They do **not** override variables that are already set in your shell session — they are set at launch time by Legendary just before the game process is spawned.
+</Note>
+
+Common variables used in this way:
+
+| Variable | Use |
+|---|---|
+| `WINEPREFIX` | Path to the Wine prefix for this game. |
+| `WINEDEBUG` | Wine debug channel filter (e.g. `-all` silences Wine debug output). |
+| `DXVK_CONFIG_FILE` | Path to a per-game `dxvk.conf` file. |
+| `DXVK_LOG_PATH` | Directory where DXVK writes its log files. |
+| `VK_ICD_FILENAMES` | Override the Vulkan ICD loader manifest (useful for multi-GPU setups). |
+| `__GL_THREADED_OPTIMIZATIONS` | NVIDIA threaded optimizations toggle. |
+
+---
+
+## Related Pages
+
+<CardGroup cols={3}>
+  <Card title="Config File Reference" icon="file-lines" href="/configuration/config-file">
+    Full reference for all config.ini sections and options.
+  </Card>
+  <Card title="Aliases" icon="tag" href="/configuration/aliases">
+    Create and manage short aliases for Epic app names.
+  </Card>
+  <Card title="Wine & Linux" icon="wine-glass" href="/guides/wine-linux">
+    Guide to configuring Wine prefixes and executables for Linux gaming.
+  </Card>
+</CardGroup>

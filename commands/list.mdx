@@ -1,0 +1,76 @@
+---
+title: "legendary list — List Available Epic Games"
+sidebarTitle: "list"
+description: "legendary list fetches and displays all games available on your Epic account. Supports platform filter, CSV/TSV/JSON output, and Unreal Engine content."
+---
+
+`legendary list` connects to the Epic Games Store and retrieves every title associated with your account, printing each game's app name, title, and version. This is typically the first command to run after authenticating — it gives you the exact app names you need for `install`, `launch`, and other commands. On your first run the command may take a while depending on the size of your library, as Legendary downloads metadata for every title.
+
+## Usage
+
+```
+legendary list [-h] [--platform <Platform>] [--include-ue] [-T] [--csv] [--tsv] [--json] [--force-refresh]
+```
+
+## Flags
+
+<ResponseField name="--platform <Platform>" type="string">
+  Platform to fetch the game list for. Defaults to **Mac** when running on macOS, otherwise **Windows**. Useful when you want to see which Windows titles are available from a macOS machine or vice versa.
+</ResponseField>
+
+<ResponseField name="--include-ue" type="flag">
+  Also include Unreal Engine content (Engine builds and Marketplace assets) in the listing. Without this flag, Unreal Engine items are hidden.
+</ResponseField>
+
+<ResponseField name="-T / --third-party / --include-non-installable" type="flag">
+  Include apps that cannot be installed directly through Legendary — for example, titles that must be activated and launched through Origin/EA App. These are hidden by default.
+</ResponseField>
+
+<ResponseField name="--csv" type="flag">
+  Output the game list in CSV format, suitable for piping into spreadsheet tools or scripts.
+</ResponseField>
+
+<ResponseField name="--tsv" type="flag">
+  Output the game list in TSV (tab-separated values) format.
+</ResponseField>
+
+<ResponseField name="--json" type="flag">
+  Output the game list as a JSON array, useful for programmatic processing.
+</ResponseField>
+
+<ResponseField name="--force-refresh" type="flag">
+  Force a full refresh of all game metadata from Epic's servers, bypassing any locally cached data. Use this if the list looks out of date or after purchasing new games.
+</ResponseField>
+
+## Examples
+
+```bash
+# List all available games
+legendary list
+
+# List games as JSON (pipe-friendly)
+legendary list --json
+
+# List games available for the Mac platform
+legendary list --platform Mac
+
+# Refresh metadata and include Unreal Engine content
+legendary list --include-ue --force-refresh
+
+# List all games including third-party titles, in CSV format
+legendary list --third-party --csv
+```
+
+## Notes
+
+<Note>
+  The first run of `legendary list` may take a while depending on how many games are in your library, since Legendary fetches and caches metadata for each title individually.
+</Note>
+
+<Tip>
+  The **App Name** shown in the list (e.g. `Anemone`) is what you pass to commands like `legendary install` and `legendary launch`. As of version 0.20.12, Legendary also accepts partial title matches and abbreviations — for example, `legendary install "world of goo"` or `legendary install wog` both work.
+</Tip>
+
+<Tip>
+  To see only the games you already have installed, run `legendary list-installed`. Pass `--check-updates` to that command to see which installed games have updates available.
+</Tip>

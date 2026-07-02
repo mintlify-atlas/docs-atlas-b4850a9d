@@ -1,0 +1,50 @@
+---
+title: "legendary list-saves — List Available Cloud Saves"
+sidebarTitle: "list-saves"
+description: "legendary list-saves shows all available cloud save files for your Epic games, optionally filtered to a single app."
+---
+
+`legendary list-saves` fetches and displays all cloud save manifests currently stored for your account on Epic's servers. Each entry shows the game name and the individual save manifest file(s) available for download. This is a read-only command — it does not upload, download, or modify any saves. Use it to verify that cloud saves exist before running `sync-saves` or `download-saves`.
+
+## Usage
+
+```
+legendary list-saves [-h] [<App Name>]
+```
+
+## Positional Arguments
+
+| Argument | Description |
+|---|---|
+| `<App Name>` | App name of the game to list saves for (optional — if omitted, saves for all games are listed) |
+
+## Examples
+
+List cloud saves for every game on your account:
+
+```bash
+legendary list-saves
+```
+
+List cloud saves for a specific game:
+
+```bash
+legendary list-saves Anemone
+```
+
+## Output Format
+
+The command groups save manifests by game and prints them in the following structure:
+
+```
+Save games:
+- <Game Title> ("<app_name>")
+ + <manifest_file_name>
+ + <manifest_file_name>
+- <Game Title> ("<app_name>")
+ + <manifest_file_name>
+```
+
+<Tip>
+  If `list-saves` returns nothing for a game you expect to have saves, check that the game actually supports cloud saves by running `legendary info <App Name>` and inspecting the "Cloud saves supported" field. Not every Epic title uses Epic's cloud save infrastructure.
+</Tip>

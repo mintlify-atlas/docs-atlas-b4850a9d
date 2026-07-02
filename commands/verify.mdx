@@ -1,0 +1,34 @@
+---
+title: "legendary verify — Verify Installed Game Files"
+sidebarTitle: "verify"
+description: "legendary verify checks the integrity of an installed game's local files against the manifest and reports missing or corrupted files."
+---
+
+`legendary verify` compares every file in a game's installation against the checksums stored in its manifest, identifying any files that are missing, have the wrong size, or have a hash mismatch. This is useful after a failed download, suspected disk corruption, or before submitting a bug report to confirm the installation is intact. Verification itself is read-only — it reports problems but does not fix them.
+
+## Usage
+
+```
+legendary verify [-h] <App Name>
+```
+
+## Examples
+
+```bash
+# Verify the local files for a game
+legendary verify Anemone
+```
+
+## Notes
+
+<Note>
+  `legendary verify` only **reports** file integrity issues — it does not download or repair anything. To fix the problems it finds, run `legendary install <App Name> --repair` afterwards.
+</Note>
+
+<Tip>
+  Verification can take several minutes for large games because Legendary reads and hashes every file on disk. Running it on an SSD is noticeably faster than on a spinning hard drive.
+</Tip>
+
+<Tip>
+  If you want to verify **and** repair in a single step, skip straight to `legendary install <App Name> --repair`. That command performs the same integrity check internally and immediately redownloads any bad files.
+</Tip>

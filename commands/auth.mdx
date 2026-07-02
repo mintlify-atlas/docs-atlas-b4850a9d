@@ -1,0 +1,126 @@
+---
+title: "legendary auth — Authenticate with Epic Games Store"
+sidebarTitle: "auth"
+description: "legendary auth authenticates with the Epic Games Store. Supports browser webview, authorization code, exchange token, session ID, and EGL import."
+---
+
+`legendary auth` establishes and manages your Epic Games Store login session. On first run — or after a logout — Legendary will attempt to open an embedded browser webview for a seamless login flow. When a webview is unavailable (for example on headless systems or when using the `--disable-webview` flag), Legendary opens `https://legendary.gl/epiclogin` in your default browser, displays the URL in the terminal, and asks you to paste the `authorizationCode` value from the JSON response. You can also authenticate non-interactively by providing an authorization code, exchange token, or session ID directly via flags, or by importing an existing session from the Epic Games Launcher.
+
+## Usage
+
+```
+legendary auth [-h] [--import] [--code <authorization code>]
+               [--token <exchange token>] [--sid <session id>]
+               [--delete] [--disable-webview]
+```
+
+## Flags
+
+<ParamField body="--import" type="flag">
+  Import authentication data from an existing Epic Games Launcher installation.
+  This transfers the active EGL session to Legendary. **Note:** importing will
+  log you out of the Epic Games Launcher. On Linux, you may need to specify the
+  WINE prefix path where EGL is installed if it cannot be detected automatically.
+</ParamField>
+
+<ParamField body="--code" type="string">
+  Use the specified **authorization code** instead of going through the
+  interactive login flow. Obtain a code from the Epic authorization endpoint or
+  the JSON response at `https://legendary.gl/epiclogin`.
+</ParamField>
+
+<ParamField body="--token" type="string">
+  Use the specified **exchange token** instead of the interactive login flow.
+  Exchange tokens are short-lived credentials that can be obtained from an
+  active Epic session.
+</ParamField>
+
+<ParamField body="--sid" type="string">
+  Use the specified **session ID** instead of the interactive login flow.
+</ParamField>
+
+<ParamField body="--delete" type="flag">
+  Remove all stored authentication data (equivalent to logging out). Legendary
+  will require a new login before any authenticated command can be used.
+</ParamField>
+
+<ParamField body="--disable-webview" type="flag">
+  Do not use the embedded browser webview for login even if one is available.
+  Legendary will fall back to printing the Epic login URL and prompting you to
+  paste the authorization code from the resulting JSON page.
+</ParamField>
+
+## How Authentication Works
+
+<Steps>
+  <Step title="Check existing credentials">
+    Legendary first checks whether stored credentials are still valid. If they
+    are, it reports the current login and exits — no new login is needed.
+  </Step>
+  <Step title="Choose a login method">
+    If no valid credentials exist, Legendary selects a login method based on the
+    flags you provide and the runtime environment:
+
+    - **Webview (default when available):** Opens an embedded browser window.
+      Complete the Epic login form and Legendary captures the session
+      automatically.
+    - **Browser + authorization code (fallback):** Legendary opens
+      `https://legendary.gl/epiclogin` in your system browser (or prints the
+      URL if it cannot). After logging in, Epic returns a JSON object — copy
+      only the `authorizationCode` value and paste it into the terminal prompt.
+    - **Non-interactive (`--code`, `--token`, `--sid`):** Credentials are
+      passed directly; no browser interaction is required.
+    - **EGL import (`--import`):** Legendary reads the active session from the
+      Epic Games Launcher's local data.
+  </Step>
+  <Step title="Session stored locally">
+    On success, Legendary stores the session credentials in its config directory
+    (`~/.config/legendary/` on Linux/macOS, `%APPDATA%\legendary\` on Windows).
+    Subsequent commands reuse these credentials without prompting.
+  </Step>
+</Steps>
+
+## Examples
+
+```bash
+# Interactive login — opens webview if available, otherwise prints the Epic login URL
+legendary auth
+
+# Login with an authorization code obtained from the Epic login page
+legendary auth --code abc123def456
+
+# Login with an exchange token
+legendary auth --token myexchangetoken789
+
+# Login with a session ID
+legendary auth --sid mysessionid000
+
+# Import session from the Epic Games Launcher (logs out of EGL)
+legendary auth --import
+
+# Log out — delete all stored credentials
+legendary auth --delete
+
+# Force the browser/code flow even if a webview is available
+legendary auth --disable-webview
+```
+
+<Note>
+  If you already have valid stored credentials, running `legendary auth` will
+  simply confirm your current login and exit without prompting. To switch
+  accounts, first run `legendary auth --delete`, then authenticate again.
+</Note>
+
+<Warning>
+  Using `--import` will **log you out of the Epic Games Launcher**. The EGL
+  session is transferred to Legendary and is no longer usable by EGL until you
+  log back in there. On Linux, if Legendary cannot find the EGL installation
+  automatically, it will ask you for the path to the WINE prefix containing EGL.
+</Warning>
+
+<Tip>
+  On headless servers or CI environments where no browser is available, use
+  `--code` or `--token` to authenticate without any interactive prompts. Generate
+  the code or token from another machine where you can complete the Epic web
+  login, then pass it via the flag.
+</Tip>

@@ -1,0 +1,178 @@
+---
+title: "Install and Manage the EOS Overlay with Legendary"
+sidebarTitle: "EOS Overlay"
+description: "Install, update, enable, and disable the Epic Online Services overlay using Legendary. Covers WINE prefix setup and per-app overlay configuration."
+---
+
+The Epic Online Services (EOS) Overlay is an in-game interface layer provided by Epic that surfaces social features — friends lists, achievements, notifications, and purchasing flows — directly inside a running game. It ships as a separate downloadable component distinct from the game itself, and must be registered in the Windows registry (or WINE prefix registry on Linux/macOS) before it will load. Legendary provides the `eos-overlay` command to install, update, enable, disable, and inspect the overlay without needing the Epic Games Launcher.
+
+<Note>
+  Not all Epic Games titles use the EOS Overlay. Games that do not call into the EOS SDK will not show the overlay regardless of whether it is installed.
+</Note>
+
+## Commands Overview
+
+All overlay management is done through the `eos-overlay` subcommand followed by an action:
+
+```bash
+legendary eos-overlay <action> [options]
+```
+
+| Action | Description |
+|---|---|
+| `install` | Download and install the EOS Overlay to the default or specified path |
+| `update` | Update an existing EOS Overlay installation |
+| `remove` | Remove the installed EOS Overlay files |
+| `enable` | Register the overlay in a WINE prefix so games can load it |
+| `disable` | Remove the overlay's registry entries from a WINE prefix |
+| `info` | Print the current overlay install path and registry status |
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `--path <path>` | Path to the EOS Overlay folder to install to or enable from |
+| `--prefix <path>` | WINE prefix to enable or disable the overlay in |
+| `--app <app name>` | Use this app's configured WINE prefix (reads from `config.ini`) |
+| `--bottle <bottle name>` | WINE bottle to enable or disable the overlay in (macOS/CrossOver) |
+
+## Installing the Overlay
+
+Download and install the EOS Overlay to its default location:
+
+```bash
+legendary eos-overlay install
+```
+
+To install to a custom directory:
+
+```bash
+legendary eos-overlay install --path /mnt/games/eos-overlay
+```
+
+<Note>
+  Installing the overlay only places the files on disk. You must also **enable** it in each WINE prefix where you want games to load it.
+</Note>
+
+## Updating the Overlay
+
+Check for and apply updates to an existing installation:
+
+```bash
+legendary eos-overlay update
+```
+
+## Enabling the Overlay in a WINE Prefix
+
+Enabling writes the overlay path into the `user.reg` file of the target WINE prefix under the `SOFTWARE\Epic Games\EOS` key (`OverlayPath` value). This is what the EOS SDK reads at game startup to locate the overlay.
+
+<Steps>
+  <Step title="Install the overlay (if not already done)">
+    ```bash
+    legendary eos-overlay install
+    ```
+  </Step>
+  <Step title="Enable it in your WINE prefix">
+    Specify the prefix explicitly:
+
+    ```bash
+    legendary eos-overlay enable --prefix ~/.wine
+    ```
+
+    Or let Legendary look up the prefix configured for a specific game:
+
+    ```bash
+    legendary eos-overlay enable --app AppName
+    ```
+  </Step>
+  <Step title="Verify the registration">
+    ```bash
+    legendary eos-overlay info
+    ```
+
+    This prints the current `OverlayPath` value stored in the prefix registry along with the installed overlay location.
+  </Step>
+</Steps>
+
+## Disabling the Overlay
+
+Remove the overlay's registry entries from a WINE prefix without uninstalling the overlay files:
+
+<Tabs>
+  <Tab title="By prefix path">
+    ```bash
+    legendary eos-overlay disable --prefix ~/.wine
+    ```
+  </Tab>
+  <Tab title="By app name">
+    ```bash
+    legendary eos-overlay disable --app AppName
+    ```
+  </Tab>
+</Tabs>
+
+## Removing the Overlay
+
+Delete the installed overlay files entirely:
+
+```bash
+legendary eos-overlay remove
+```
+
+<Warning>
+  Removing the overlay files will break any WINE prefix that still has the overlay enabled, since the registered path will no longer exist. Run `eos-overlay disable` in each prefix first, or reinstall the overlay afterwards.
+</Warning>
+
+## Checking Overlay Status
+
+Print the current overlay installation path and whether it is registered in a prefix:
+
+```bash
+legendary eos-overlay info
+```
+
+## Examples
+
+```bash
+# Install to the default location
+legendary eos-overlay install
+
+# Enable in a specific WINE prefix
+legendary eos-overlay enable --prefix ~/.wine
+
+# Enable using a game's configured prefix from config.ini
+legendary eos-overlay enable --app AppName
+
+# Disable in a specific WINE prefix
+legendary eos-overlay disable --prefix ~/.wine
+
+# Update the overlay to the latest version
+legendary eos-overlay update
+
+# Check current overlay install path and registry status
+legendary eos-overlay info
+```
+
+## How Registry Entries Work
+
+On Linux and macOS (WINE), Legendary reads and writes the WINE prefix's `user.reg` file directly — it does not require `regedit` or a running WINE process. The overlay path is stored as:
+
+```
+[SOFTWARE\\Epic Games\\EOS]
+"OverlayPath"="Z:/path/to/eos/overlay"
+```
+
+Paths starting with `/` are automatically rewritten to `Z:` notation (the Unix filesystem mount point inside WINE) when written to the registry, and converted back when read.
+
+<Note>
+  The EOS Overlay must be enabled **separately in each WINE prefix** you use. Enabling it in one prefix does not affect others.
+</Note>
+
+<CardGroup cols={2}>
+  <Card title="Epic Online Services" icon="gamepad" href="https://dev.epicgames.com/docs/epic-online-services">
+    Official Epic Online Services developer documentation
+  </Card>
+  <Card title="WineHQ" icon="wine-glass" href="https://www.winehq.org/">
+    Wine compatibility layer for running Windows applications on Linux and macOS
+  </Card>
+</CardGroup>

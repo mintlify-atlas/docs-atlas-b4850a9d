@@ -1,0 +1,92 @@
+---
+title: "legendary egl-sync — Sync with Epic Games Launcher"
+sidebarTitle: "egl-sync"
+description: "legendary egl-sync imports, exports, and automatically syncs game installations between Legendary and the Epic Games Launcher on the same machine."
+---
+
+`legendary egl-sync` bridges the gap between Legendary and the Epic Games Launcher (EGL) when both are installed on the same machine. It reads and writes EGL's manifest folder so that games installed by either client are visible and manageable by the other, eliminating the need to reinstall games you already have on disk. On Linux and macOS you point it at the WINE prefix where EGL lives; on Windows the path is detected automatically. Running it with no flags launches an interactive setup wizard.
+
+## Usage
+
+```
+legendary egl-sync [-h] [--egl-manifest-path EGL_MANIFEST_PATH] [--egl-wine-prefix EGL_WINE_PREFIX] [--enable-sync] [--disable-sync] [--one-shot] [--import-only] [--export-only] [--migrate] [--unlink]
+```
+
+## Options
+
+| Flag | Description |
+|---|---|
+| `--egl-manifest-path <path>` | Explicit path to EGL's `Manifests` folder. Should point to `.../ProgramData/Epic/EpicGamesLauncher/Data/Manifests`. |
+| `--egl-wine-prefix <path>` | Path to the WINE prefix where EGL is installed. Legendary will locate the Manifests folder automatically within this prefix. |
+| `--enable-sync` | Enable automatic bidirectional sync so every future `legendary` invocation syncs with EGL without requiring a manual `egl-sync` call. |
+| `--disable-sync` | Disable automatic sync and exit immediately (does not unlink games). |
+| `--one-shot` | Perform a single sync operation without prompting to enable automatic sync. |
+| `--import-only` | Only import games from EGL into Legendary; skip the export step. |
+| `--export-only` | Only export games from Legendary to EGL; skip the import step. |
+| `--migrate` | Import all EGL games into Legendary and then remove them from EGL (implies `--import-only`, `--one-shot`, and disables automatic sync afterward). |
+| `--unlink` | Disable sync and strip all EGL metadata (GUIDs) from Legendary's installed-games database. Games remain installed and playable through both clients. |
+
+## Examples
+
+Interactive first-time setup (recommended for new users):
+
+```bash
+legendary egl-sync
+```
+
+Non-interactive setup (accept all prompts automatically):
+
+```bash
+legendary -y egl-sync
+```
+
+Point to a custom EGL Manifests folder (e.g. a WINE prefix on Linux):
+
+```bash
+legendary egl-sync --egl-manifest-path "/mnt/c/ProgramData/Epic/EpicGamesLauncher/Data/Manifests"
+```
+
+Enable automatic bidirectional sync:
+
+```bash
+legendary egl-sync --enable-sync
+```
+
+Import all EGL games into Legendary and fully migrate away from EGL:
+
+```bash
+legendary egl-sync --migrate
+```
+
+Remove all EGL sync metadata without uninstalling anything:
+
+```bash
+legendary egl-sync --unlink
+```
+
+## How Sync Works
+
+When sync is enabled, Legendary maintains a GUID linkage between each installed game in its own database and the corresponding manifest entry in EGL's `Manifests` folder. On each sync operation it:
+
+1. Reads EGL's Manifests directory to find games installed by EGL that are not yet known to Legendary (**import**).
+2. Writes manifest entries to EGL's Manifests directory for games installed by Legendary that EGL does not know about (**export**).
+
+<Note>
+  EGL sync is **not** supported for the macOS-native version of the Epic Games Launcher. It works on Windows natively and on Linux/macOS when EGL is running under WINE.
+</Note>
+
+<Warning>
+  After running `--unlink`, future installs or updates performed by one client will not be reflected in the other. If you later want to re-establish sync you will need to run `egl-sync` again from scratch.
+</Warning>
+
+## Configuration
+
+Once sync is enabled, Legendary stores the path to EGL's Manifests folder in `~/.config/legendary/config.ini`:
+
+```ini
+[Legendary]
+egl_sync = true
+egl_programdata = /path/to/EpicGamesLauncher/Data/Manifests
+```
+
+You can disable sync at any time by setting `egl_sync = false` in the config file or by running `legendary egl-sync --disable-sync`.

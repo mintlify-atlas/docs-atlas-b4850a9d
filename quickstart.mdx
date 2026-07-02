@@ -1,47 +1,119 @@
 ---
-title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+title: "Get Started with Legendary in 5 Minutes"
+sidebarTitle: "Quickstart"
+description: "Authenticate with Epic Games, list your library, and install your first game using Legendary in a few simple terminal commands."
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
+Once Legendary is installed, you are only a handful of commands away from downloading and launching your Epic Games library entirely from the terminal. This guide walks you through authentication, browsing your library, installing a game, checking for updates, and launching a title — everything you need to be up and running in minutes.
 
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
-
-## Prerequisites
-
-Before you begin, you must have:
-
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
-
-## Get started
+<Tip>
+  On Windows with PowerShell, prefix all commands with `.\` — for example, `.\legendary auth` instead of `legendary auth` — if the command is not found in your session.
+</Tip>
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+  <Step title="Authenticate with Epic Games">
+    Run the authentication command to log in to your Epic Games account:
 
     ```bash
-    npm install your-package
+    legendary auth
     ```
+
+    **What happens next depends on your setup:**
+
+    - **With pywebview installed:** An embedded browser window opens automatically. Log in and Legendary handles the rest.
+    - **Without pywebview (standard browser flow):** Legendary opens the Epic login page in your default browser. After logging in, you will see a JSON response in the browser. Copy the value of the `"authorizationCode"` field and paste it into the terminal, then press Enter.
+    - **Importing from the Epic Games Launcher:** If you already have EGL installed and want to reuse its session (note: this logs you out of EGL), run:
+
+    ```bash
+    legendary auth --import
+    ```
+
+    <Note>
+      If your stored credentials are still valid from a previous session, `legendary auth` will detect them and skip the login flow, reporting that the existing session is active.
+    </Note>
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
+
+  <Step title="List Your Game Library">
+    Fetch your full list of available games from Epic:
 
     ```bash
-    your-cli init
+    legendary list
     ```
+
+    The first run may take a while if you have a large library, as Legendary downloads and caches metadata for every title. Once complete, it prints each game's **app name** (used for install/launch commands) alongside its display title.
+
+    <Tip>
+      Use `legendary list --json` to output the full library in JSON format, which is useful for scripting or piping into other tools.
+    </Tip>
   </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
+
+  <Step title="Install a Game">
+    Install a game using its app name from the list:
 
     ```bash
-    your-cli start
+    legendary install Anemone
     ```
+
+    As of version 0.20.12, Legendary also accepts partial title matches, so you do not need to know the exact app name. For example, both of the following work for *World of Goo*:
+
+    ```bash
+    legendary install "world of goo"
+    legendary install wog
+    ```
+
+    Legendary will prompt you to confirm the install path and select any optional DLC or selective download components before downloading begins. Games are installed to `~/Games` by default — this can be changed in the [config file](/configuration/config-file).
+  </Step>
+
+  <Step title="Check Installed Games and Updates">
+    See all your installed games and whether any updates are available:
+
+    ```bash
+    legendary list-installed --check-updates
+    ```
+
+    This prints a table of installed titles along with their installed version, and flags any that have a newer version available on Epic's CDN. To update a game, run `legendary install <App Name>` — the `install` command also serves as the update command.
+  </Step>
+
+  <Step title="Launch a Game">
+    Launch a game with full online authentication (required for multiplayer and DRM-protected titles):
+
+    ```bash
+    legendary launch "world of goo"
+    ```
+
+    **Offline mode** — Most games run fine without contacting Epic's servers. To skip online authentication:
+
+    ```bash
+    legendary launch <App Name> --offline
+    ```
+
+    **Dry run** — To get the exact launch command without actually running the game (useful for integrating into Lutris, Steam, or other launchers):
+
+    ```bash
+    legendary launch <App Name> --offline --dry-run
+    ```
+
+    <Tip>
+      Most games do not require launching through Legendary at all once installed — you can run the game executable directly. Use `--dry-run` to find the executable path and any required launch parameters.
+    </Tip>
   </Step>
 </Steps>
 
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
+## What's Next
 
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
-</Tip>
+Now that you have the basics down, explore the rest of the documentation to get the most out of Legendary:
+
+<CardGroup cols={2}>
+  <Card title="Configuration File" icon="sliders" href="/configuration/config-file">
+    Customize Legendary's behavior with per-game settings, WINE configuration, aliases, environment variables, and more.
+  </Card>
+  <Card title="Installing Games" icon="compact-disc" href="/guides/installing-games">
+    Learn about selective downloads, DLC management, custom install paths, delta patching, and repairing installations.
+  </Card>
+  <Card title="Cloud Saves" icon="cloud-arrow-up" href="/guides/cloud-saves">
+    Sync your save games to and from the Epic cloud, compatible with the Epic Games Launcher's save format.
+  </Card>
+  <Card title="Commands Overview" icon="terminal" href="/commands/overview">
+    Browse the full reference for every Legendary command, including EGL sync, EOS overlay, aliases, and third-party activation.
+  </Card>
+</CardGroup>

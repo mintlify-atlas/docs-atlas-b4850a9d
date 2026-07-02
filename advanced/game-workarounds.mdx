@@ -1,0 +1,203 @@
+---
+title: "Game Launch Overrides and Workarounds in Legendary"
+sidebarTitle: "Game Workarounds"
+description: "Override executables, set custom launch parameters, use pre-launch scripts, and configure per-game workarounds in Legendary."
+---
+
+Some games ship bundled launchers or update helpers that don't work correctly when invoked through Legendary. Others require specific command-line arguments, a particular language locale, or a wrapper like `gamemode` to run properly. Legendary provides a flexible set of per-game configuration keys and CLI overrides to handle these situations without modifying game files. All per-game settings live in `~/.config/legendary/config.ini` (Linux/macOS) or `%APPDATA%\legendary\config.ini` (Windows) under an `[AppName]` section, where `AppName` is the game's app name as shown by `legendary list`.
+
+## Overriding the Game Executable
+
+Some games install a launcher executable as their default entry point — for example, Borderlands launches a separate `LauncherPatcher.exe` before the actual game binary. Legendary allows you to bypass this and point directly to the real game executable using a path relative to the game's install directory.
+
+```ini
+[AppName]
+override_exe = relative/path/to/game.exe
+```
+
+You can also override the executable for a single launch without saving it:
+
+```bash
+legendary launch <App> --override-exe relative/path/to/file.exe
+```
+
+<Note>
+Legendary includes built-in executable overrides for certain known titles (such as Civilization VI on Linux/macOS) that are applied automatically. These are fetched from the Legendary API and do not require manual configuration.
+</Note>
+
+## Setting Start Parameters
+
+To pass additional command-line arguments to a game every time it launches, use `start_params`. These are appended to the arguments that Legendary already constructs (Epic authentication tokens, locale flags, etc.):
+
+```ini
+[AppName]
+start_params = -windowed -dx11
+```
+
+## Pre-Launch Commands
+
+Legendary can run an arbitrary command before launching a game. This is useful for setup scripts, mounting drives, or starting companion services. The command is specified as a shell string and split with `shlex`, so quoting works as expected.
+
+```ini
+[AppName3]
+pre_launch_command = /path/to/script.sh
+; Set to true to block game launch until the command exits
+pre_launch_wait = false
+```
+
+When `pre_launch_wait = true`, Legendary blocks until the pre-launch process exits before starting the game. When `false` (the default), the command is started and the game launches immediately without waiting.
+
+You can also set a default pre-launch command for all games in the `[default]` section:
+
+```ini
+[default]
+pre_launch_command = /usr/bin/some-global-script.sh
+pre_launch_wait = false
+```
+
+Game-specific settings in `[AppName]` take precedence over `[default]`.
+
+## Language Override
+
+Legendary passes a locale flag to games via the Epic command-line parameters. To override the language for a specific game:
+
+```ini
+[AppName]
+language = fr
+```
+
+Or pass it at launch time without saving:
+
+```bash
+legendary launch <App> --language fr
+```
+
+The value should be a two-letter ISO 639-1 language code. If no language is configured for a game, Legendary falls back to the system locale.
+
+## Launching Offline by Default
+
+Games that don't require online authentication can be configured to always launch in offline mode, skipping the Epic token exchange:
+
+```ini
+[AppName]
+offline = true
+```
+
+Equivalent CLI flag:
+
+```bash
+legendary launch <App> --offline
+```
+
+## Skip Version Check
+
+To suppress the update check when launching a game (useful if you intentionally stay on an older version):
+
+```ini
+[AppName]
+skip_update_check = true
+```
+
+Equivalent CLI flag:
+
+```bash
+legendary launch <App> --skip-version-check
+```
+
+## Using a Wrapper
+
+Wrappers such as `gamemode`, `mangohud`, or custom scripts can be applied globally or per-game:
+
+```ini
+; Apply to all games
+[default]
+wrapper = gamemode
+
+; Apply to a specific game (overrides [default])
+[AppName2]
+wrapper = "/path/with spaces/gamemoderun"
+```
+
+Or via CLI for a single launch:
+
+```bash
+legendary launch <App> --wrapper "gamemoderun"
+```
+
+<Note>
+Wrap the wrapper path in quotes inside the `config.ini` value if it contains spaces.
+</Note>
+
+## Wine and No-Wine Options
+
+On Linux and macOS, Legendary uses Wine to run Windows game binaries. You can configure the Wine executable and prefix globally or per-game:
+
+```ini
+[default]
+wine_executable = wine
+wine_prefix = /home/user/.wine
+
+[AppName]
+wine_executable = /path/to/wine64
+wine_prefix = /mnt/tank/games/Game/.wine
+```
+
+Or pass them directly at launch:
+
+```bash
+legendary launch <App> --wine /usr/bin/wine64 --wine-prefix ~/.wine
+```
+
+If your wrapper already handles Wine (e.g. a Proton wrapper), you can tell Legendary not to add the Wine binary to the launch command:
+
+```ini
+[AppName2]
+no_wine = true
+```
+
+## Per-Game Environment Variables
+
+You can set environment variables for a specific game by adding an `[AppName.env]` section. These are merged into the game's launch environment and override any variables set in `[default.env]`:
+
+```ini
+[AppName.env]
+WINEPREFIX = /mnt/tank/games/Game/.wine
+DXVK_CONFIG_FILE = /mnt/tank/games/Game/dxvk.conf
+```
+
+## Override Username
+
+To present a custom display name to the game instead of your Epic account username:
+
+```bash
+legendary launch <App> --override-username myname
+```
+
+## Download Order Optimization
+
+For certain known titles, Legendary automatically reorders file downloads to reduce RAM usage during patching. This optimization is enabled by default for the following games:
+
+| Game | App Name |
+|---|---|
+| World War Z | `wombat` |
+| Metro Exodus | `snapdragon` |
+| Diabotical | `honeycreeper` |
+| Pillars of Eternity (v1.0.2) | `bcc75c246fe04e45b0c1f1c3fd52503a` |
+
+The list is refreshed from the Legendary API on each run. You can also enable this optimization manually for any game with:
+
+```bash
+legendary install <App> --enable-reordering
+```
+
+## Getting a Dry-Run Launch Command
+
+Legendary can print the full launch command it would use — including all Epic tokens, locale flags, and Wine invocations — without actually launching the game. This is useful for feeding the command into external launchers like Lutris or Steam:
+
+```bash
+legendary launch <App> --offline --dry-run
+```
+
+<Tip>
+Use `--dry-run` together with `--offline` to generate a standalone launch command that doesn't require an active Epic session. You can then paste that command directly into Lutris's "Manual Game" configuration or a Steam non-Steam game entry.
+</Tip>

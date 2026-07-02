@@ -1,0 +1,45 @@
+---
+title: "legendary move — Move a Game Installation"
+sidebarTitle: "move"
+description: "legendary move relocates an installed Epic game to a new base directory, updating Legendary's database to track the new location."
+---
+
+`legendary move` relocates an installed game to a different base directory on your filesystem and updates Legendary's internal database so future commands (such as `install`, `launch`, and `verify`) know where to find the game. By default it physically moves the game folder for you; if you have already moved the files yourself, pass `--skip-move` to update only the database entry without touching the filesystem.
+
+## Usage
+
+```
+legendary move [-h] [--skip-move] <App Name> <New Base Path>
+```
+
+The `<New Base Path>` argument is the **parent** directory into which the game folder will be moved — not the full destination path of the game folder itself. For example, `legendary move Anemone /mnt/new-drive` will move the game to `/mnt/new-drive/<GameFolder>`.
+
+## Flags
+
+<ResponseField name="--skip-move" type="flag">
+  Update Legendary's database to reflect the new location without physically moving any files. Use this when you have already moved the game folder manually and just need Legendary to track the new path.
+</ResponseField>
+
+## Examples
+
+```bash
+# Move a game to a new drive (Legendary handles the file move)
+legendary move Anemone /mnt/new-drive
+
+# Update the database after moving files manually
+legendary move Anemone /mnt/new-drive --skip-move
+```
+
+## Notes
+
+<Note>
+  The `<New Base Path>` is the destination **base directory**, not the full game folder path. Legendary preserves the game's folder name when moving, placing it as a subdirectory of the path you provide.
+</Note>
+
+<Warning>
+  Moving a large game across drives (e.g. from `/dev/sda` to `/dev/sdb`) requires copying all game data, which can take considerable time and temporary space equal to the game's installation size. Make sure the destination drive has enough free space before running the command.
+</Warning>
+
+<Tip>
+  If you only want to update the path record without moving files (for example, after copying files with `rsync`), use `--skip-move`. This is instant regardless of game size.
+</Tip>
