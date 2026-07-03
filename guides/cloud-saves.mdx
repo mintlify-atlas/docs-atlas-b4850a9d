@@ -1,7 +1,7 @@
 ---
-title: "Sync Cloud Saves with Epic Games Cloud"
+title: "Sync Epic Games Cloud Saves Using the Legendary CLI"
 sidebarTitle: "Cloud Saves"
-description: "Upload and download save games to the Epic cloud using Legendary. Sync all games at once or manage saves for individual titles."
+description: "Upload and download Epic Games cloud saves with Legendary. Sync all supported games at once, or target individual titles by app name and force direction."
 ---
 
 Legendary supports bidirectional cloud save synchronisation with Epic's save game service, fully compatible with the Epic Games Launcher. Saves stored in the cloud can be downloaded to your local machine and local saves can be uploaded back — changes made in either Legendary or EGL will be visible on both sides. Not every game on Epic supports cloud saves; the feature must be enabled by the developer.
@@ -67,12 +67,6 @@ legendary sync-saves --save-path /path/to/saves <App Name>
 ```
 
 ## Additional Options
-
-**Accept the auto-detected path without prompting:**
-
-```bash
-legendary sync-saves --accept-path <App Name>
-```
 
 **Disable filename filters** (sync all files in the save directory, not just those matching the game's known patterns):
 

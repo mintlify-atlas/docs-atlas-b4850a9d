@@ -1,10 +1,10 @@
 ---
 title: "legendary install — Download and Install Epic Games"
-sidebarTitle: "install"
-description: "legendary install downloads and installs an Epic game. Aliases: download, update. Supports DLC, delta patching, repair, custom paths, and selective downloads."
+sidebarTitle: "Install"
+description: "legendary install downloads and installs an Epic game. Aliases: download, update, repair. Supports DLC, delta patching, and selective downloads."
 ---
 
-`legendary install` is the primary command for downloading and installing games from your Epic Games account. It handles everything from a fresh install to incremental updates using delta patching, DLC management, selective downloading, and repair of corrupted files. The command is also available as `legendary download` and `legendary update` — all three aliases share the same flags and behavior.
+`legendary install` is the primary command for downloading and installing games from your Epic Games account. It handles everything from a fresh install to incremental updates using delta patching, DLC management, selective downloading, and repair of corrupted files. The command is also available as `legendary download`, `legendary update`, and `legendary repair` — all four aliases share the same flags and behavior.
 
 ## Usage
 
@@ -12,7 +12,7 @@ description: "legendary install downloads and installs an Epic game. Aliases: do
 legendary install <App Name> [options]
 ```
 
-**Aliases:** `download`, `update`
+**Aliases:** `download`, `update`, `repair`
 
 The `<App Name>` argument accepts the exact app name (e.g. `Anemone`), a partial title match, or an abbreviation. For multi-word names, use quotes (e.g. `"world of goo"`).
 
@@ -174,9 +174,10 @@ legendary install Anemone --base-path /mnt/games
 # Install with all DLCs, no prompts
 legendary install Anemone --with-dlcs
 
-# Update an already-installed game (three equivalent commands)
+# Update an already-installed game (all four commands are equivalent)
 legendary update Anemone
 legendary download Anemone
+legendary repair Anemone
 legendary install Anemone
 
 # Only update if already installed; do nothing otherwise

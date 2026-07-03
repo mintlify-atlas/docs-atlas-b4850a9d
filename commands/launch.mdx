@@ -1,6 +1,6 @@
 ---
 title: "legendary launch — Launch an Installed Epic Game"
-sidebarTitle: "launch"
+sidebarTitle: "Launch"
 description: "legendary launch starts an installed Epic game with optional online authentication, WINE support, wrapper commands, language overrides, and dry-run mode."
 ---
 
@@ -9,10 +9,10 @@ description: "legendary launch starts an installed Epic game with optional onlin
 ## Usage
 
 ```
-legendary launch <App Name> [options] [-- <game args>]
+legendary launch <App Name> [options]
 ```
 
-Any arguments that follow the known Legendary flags are passed through directly to the game process. The `<App Name>` accepts the exact app name, a partial title match, or a configured alias.
+Any additional arguments that follow the known Legendary flags are passed through directly to the game process. The `<App Name>` accepts the exact app name, a partial title match, or a configured alias.
 
 ## Flags
 
@@ -143,7 +143,7 @@ legendary launch Anemone --reset-defaults
 </Tip>
 
 <Note>
-  Any flags not recognized by Legendary are passed through to the game process. To avoid ambiguity, place game-specific arguments after all Legendary flags.
+  Additional arguments placed after the Legendary flags are passed through directly to the game process.
 </Note>
 
 <Tip>

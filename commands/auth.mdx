@@ -1,6 +1,6 @@
 ---
 title: "legendary auth — Authenticate with Epic Games Store"
-sidebarTitle: "auth"
+sidebarTitle: "Auth"
 description: "legendary auth authenticates with the Epic Games Store. Supports browser webview, authorization code, exchange token, session ID, and EGL import."
 ---
 
@@ -48,6 +48,10 @@ legendary auth [-h] [--import] [--code <authorization code>]
   Do not use the embedded browser webview for login even if one is available.
   Legendary will fall back to printing the Epic login URL and prompting you to
   paste the authorization code from the resulting JSON page.
+
+  **Note:** The embedded webview requires `pywebview` to be installed and is
+  currently **not supported on macOS**. On macOS the browser/code flow is always
+  used regardless of this flag.
 </ParamField>
 
 ## How Authentication Works

@@ -1,7 +1,7 @@
 ---
-title: "Legendary Configuration File Reference"
+title: "Legendary config.ini File Reference and Options Guide"
 sidebarTitle: "Config File"
-description: "Configure Legendary's global settings, per-game options, environment variables, and macOS preferences using the config.ini file."
+description: "Complete reference for Legendary's config.ini file: global settings, per-game launch options, Wine configuration, and macOS preferences."
 ---
 
 Legendary stores all persistent configuration in a single INI-format file called `config.ini`. The file is divided into named sections — a global `[Legendary]` section for application-wide settings, a `[default]` section for game-launch defaults that apply to every title unless overridden, and per-app sections identified by the game's Epic app name (e.g. `[AppName]`). You can also define environment variables for individual games using `[AppName.env]` sections. Any value you set here persists across runs and avoids having to pass flags on every command invocation.
@@ -243,7 +243,7 @@ DXVK_CONFIG_FILE = /mnt/tank/games/Game/dxvk.conf
 
 <CardGroup cols={3}>
   <Card title="Environment Variables" icon="terminal" href="/configuration/environment-variables">
-    Override Legendary's config path and log level using shell environment variables.
+    Override Legendary's config directory path using shell environment variables.
   </Card>
   <Card title="Aliases" icon="tag" href="/configuration/aliases">
     Create and manage short aliases for Epic app names.

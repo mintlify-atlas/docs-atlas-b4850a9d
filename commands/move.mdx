@@ -1,7 +1,7 @@
 ---
-title: "legendary move — Move a Game Installation"
-sidebarTitle: "move"
-description: "legendary move relocates an installed Epic game to a new base directory, updating Legendary's database to track the new location."
+title: "legendary move — Relocate an Installed Epic Game"
+sidebarTitle: "Move"
+description: "legendary move relocates an installed Epic game to a new base path and updates Legendary's database. Use --skip-move if files were already moved."
 ---
 
 `legendary move` relocates an installed game to a different base directory on your filesystem and updates Legendary's internal database so future commands (such as `install`, `launch`, and `verify`) know where to find the game. By default it physically moves the game folder for you; if you have already moved the files yourself, pass `--skip-move` to update only the database entry without touching the filesystem.

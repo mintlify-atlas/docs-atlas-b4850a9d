@@ -1,7 +1,7 @@
 ---
 title: "Game Launch Overrides and Workarounds in Legendary"
 sidebarTitle: "Game Workarounds"
-description: "Override executables, set custom launch parameters, use pre-launch scripts, and configure per-game workarounds in Legendary."
+description: "Override executables, set custom launch parameters, run pre-launch scripts, and configure per-game settings and workarounds in Legendary."
 ---
 
 Some games ship bundled launchers or update helpers that don't work correctly when invoked through Legendary. Others require specific command-line arguments, a particular language locale, or a wrapper like `gamemode` to run properly. Legendary provides a flexible set of per-game configuration keys and CLI overrides to handle these situations without modifying game files. All per-game settings live in `~/.config/legendary/config.ini` (Linux/macOS) or `%APPDATA%\legendary\config.ini` (Windows) under an `[AppName]` section, where `AppName` is the game's app name as shown by `legendary list`.

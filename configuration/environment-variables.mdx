@@ -1,7 +1,7 @@
 ---
-title: "Legendary Environment Variables"
+title: "Shell Environment Variables for Legendary Configuration"
 sidebarTitle: "Environment Variables"
-description: "Override Legendary's config path, log level, and behavior using environment variables. Use LEGENDARY_CONFIG_PATH to switch between profiles."
+description: "Override Legendary's config directory path using shell environment variables. Use LEGENDARY_CONFIG_PATH to maintain multiple isolated profiles."
 ---
 
 Legendary respects a small set of shell environment variables that control where it looks for configuration and data files. These variables are evaluated every time Legendary starts, before any config file is read, making them useful for switching between multiple accounts or setups without touching any files. In addition, per-game `[AppName.env]` sections in `config.ini` let you inject arbitrary environment variables into a game's launch environment — this is how you configure Wine, DXVK, and other runtime settings on Linux and macOS.
@@ -48,6 +48,50 @@ If neither `LEGENDARY_CONFIG_PATH` nor `XDG_CONFIG_HOME` is set, Legendary falls
 
 ---
 
+### `LGDRY_WRAPPER`
+
+Sets the default `--wrapper` argument for `legendary launch`. Useful when you always want to launch games through a wrapper (such as `gamemode`) without passing the flag every time.
+
+```bash
+export LGDRY_WRAPPER=gamemode
+legendary launch Anemone
+```
+
+---
+
+### `LGDRY_WINE_BINARY`
+
+Sets the default `--wine` argument for `legendary launch` on Linux and macOS. Equivalent to setting `wine_executable` in the `[default]` section of `config.ini`, but applied only for the current shell session.
+
+```bash
+export LGDRY_WINE_BINARY=/usr/bin/wine64
+legendary launch Anemone
+```
+
+---
+
+### `LGDRY_WINE_PREFIX`
+
+Sets the default `--wine-prefix` argument for `legendary launch` on Linux and macOS. Equivalent to setting `wine_prefix` in the `[default]` section of `config.ini` for the current session.
+
+```bash
+export LGDRY_WINE_PREFIX=/home/user/.wine
+legendary launch Anemone
+```
+
+---
+
+### `LGDRY_NO_WINE`
+
+Sets the default `--no-wine` flag for `legendary launch` on Linux and macOS. Set to `true` to suppress Wine for the current session (e.g. when using a wrapper that handles Windows emulation itself).
+
+```bash
+export LGDRY_NO_WINE=true
+legendary launch Anemone
+```
+
+---
+
 ## Config Path Resolution Order
 
 The config directory is resolved using this priority chain (first match wins):
@@ -83,7 +127,7 @@ WINEPREFIX = /home/user/legendary/.wine
 ```
 
 <Note>
-  Variables defined in `[AppName.env]` override the same key in `[default.env]`. They do **not** override variables that are already set in your shell session — they are set at launch time by Legendary just before the game process is spawned.
+  Variables defined in `[AppName.env]` override the same key in `[default.env]`. They **also override** any matching variable already set in your shell session — Legendary copies the current environment and then applies the config values on top before spawning the game process.
 </Note>
 
 Common variables used in this way:

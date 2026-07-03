@@ -1,5 +1,5 @@
 ---
-title: "Download and Install Epic Games with Legendary"
+title: "Install, Update, and Repair Epic Games with Legendary"
 sidebarTitle: "Installing Games"
 description: "Install, update, repair, and manage Epic Games using Legendary. Covers DLC, delta patching, install paths, and selective downloading."
 ---
@@ -96,7 +96,13 @@ legendary update <App Name>
 legendary install <App Name> --update-only
 ```
 
-**Disable delta patching:** By default Legendary requests a delta manifest so only changed chunks are downloaded. To force a full manifest comparison:
+**Disable patching:** By default Legendary patches existing files using only the changed chunks. To skip patching and download entire changed files instead:
+
+```bash
+legendary install <App Name> --disable-patching
+```
+
+**Disable delta manifests:** To skip delta manifest fetching during an update (may increase download size):
 
 ```bash
 legendary install <App Name> --disable-delta-manifests

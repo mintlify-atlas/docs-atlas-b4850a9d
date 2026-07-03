@@ -1,6 +1,6 @@
 ---
 title: "legendary egl-sync — Sync with Epic Games Launcher"
-sidebarTitle: "egl-sync"
+sidebarTitle: "EGL Sync"
 description: "legendary egl-sync imports, exports, and automatically syncs game installations between Legendary and the Epic Games Launcher on the same machine."
 ---
 
@@ -23,7 +23,7 @@ legendary egl-sync [-h] [--egl-manifest-path EGL_MANIFEST_PATH] [--egl-wine-pref
 | `--one-shot` | Perform a single sync operation without prompting to enable automatic sync. |
 | `--import-only` | Only import games from EGL into Legendary; skip the export step. |
 | `--export-only` | Only export games from Legendary to EGL; skip the import step. |
-| `--migrate` | Import all EGL games into Legendary and then remove them from EGL (implies `--import-only`, `--one-shot`, and disables automatic sync afterward). |
+| `--migrate` | Import all EGL games into Legendary and then remove them from EGL (implies `--import-only`, `--one-shot`, and `--unlink`). |
 | `--unlink` | Disable sync and strip all EGL metadata (GUIDs) from Legendary's installed-games database. Games remain installed and playable through both clients. |
 
 ## Examples
